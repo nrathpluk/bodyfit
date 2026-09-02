@@ -26,6 +26,11 @@ npm run db:generate         # สร้าง migration จาก src/db/schema.
 npm run db:migrate          # รัน migration (ต้องมี DATABASE_URL จริง)
 ```
 
+**ฐานข้อมูล** — migration รันได้สองทาง: `npm run db:migrate` (ต้องมี `DIRECT_URL` ใน `.env.local`)
+หรือยิงผ่าน Supabase connector ตอนไม่มีรหัสผ่านฐานข้อมูล ถ้าใช้ทางหลัง **ต้องเขียนแถวลง
+`drizzle.__drizzle_migrations` เอง** (hash = sha256 ของทั้งไฟล์ .sql, created_at = ค่า `when`
+ใน `meta/_journal.json`) ไม่งั้น `db:migrate` ครั้งถัดไปจะรันซ้ำแล้วพังที่ "ตารางมีอยู่แล้ว"
+
 ## Next.js 16 — ไม่เหมือนที่จำมา
 
 - middleware ถูกเปลี่ยนชื่อเป็น **proxy** → ไฟล์คือ `src/proxy.ts` (export default)
