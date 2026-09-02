@@ -1,19 +1,19 @@
 import "server-only";
 
 /**
- * ตรวจ env ตอน "เรียกครั้งแรก" ไม่ใช่ตอน import
+ * ตรวจ env ตอน "อ่านค่าจริง" ไม่ใช่ตอน import และไม่ใช่ตอนเรียก serverEnv()
  *
- * เหตุผล: `next build` ต้อง import ทุก route เพื่อวิเคราะห์ ถ้าโยน error ตอน import
- * แอปจะ build ไม่ผ่านบนเครื่องที่ไม่มี env จริง (เช่น CI ที่ไม่มี DATABASE_URL)
- * อย่าย้ายไปตรวจที่ระดับ top-level
+ * เหตุผลที่ต้อง lazy: `next build` ต้อง import ทุก route เพื่อวิเคราะห์
+ * ถ้าโยน error ตอน import แอปจะ build ไม่ผ่านบนเครื่องที่ไม่มี env จริง (เช่น CI)
+ *
+ * เหตุผลที่ต้องแยกทีละตัว (ไม่ใช่ตรวจครบทุกตัวรวดเดียว): หน้าที่ใช้แค่ auth
+ * ไม่ควรพังเพราะยังไม่ได้ตั้ง DATABASE_URL — ให้แต่ละส่วนพังเฉพาะ env ที่ตัวเองใช้
  */
 type ServerEnv = {
-  DATABASE_URL: string;
-  SUPABASE_URL: string;
-  SUPABASE_PUBLISHABLE_KEY: string;
+  readonly DATABASE_URL: string;
+  readonly SUPABASE_URL: string;
+  readonly SUPABASE_PUBLISHABLE_KEY: string;
 };
-
-let cached: ServerEnv | null = null;
 
 function required(name: string): string {
   const value = process.env[name];
@@ -21,12 +21,18 @@ function required(name: string): string {
   return value;
 }
 
+const env: ServerEnv = {
+  get DATABASE_URL() {
+    return required("DATABASE_URL");
+  },
+  get SUPABASE_URL() {
+    return required("NEXT_PUBLIC_SUPABASE_URL");
+  },
+  get SUPABASE_PUBLISHABLE_KEY() {
+    return required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+  },
+};
+
 export function serverEnv(): ServerEnv {
-  if (cached) return cached;
-  cached = {
-    DATABASE_URL: required("DATABASE_URL"),
-    SUPABASE_URL: required("NEXT_PUBLIC_SUPABASE_URL"),
-    SUPABASE_PUBLISHABLE_KEY: required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
-  };
-  return cached;
+  return env;
 }
