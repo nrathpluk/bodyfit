@@ -56,6 +56,10 @@ npm run db:migrate          # รัน migration (ต้องมี DATABASE_U
 
 `prepare: false` จำเป็นสำหรับ transaction pooler ของ Supabase (port 6543) ห้ามเอาออก
 
+**สอง connection string คนละหน้าที่** — ตัวแอปใช้ `DATABASE_URL` (transaction pooler, 6543)
+ส่วน migration ใช้ `DIRECT_URL` (session pooler, 5432) เพราะ transaction pooler
+ไม่การันตีว่าทุกคำสั่งใน migration เดียวกันจะวิ่งบน connection เดิม DDL ยาว ๆ จึงพังกลางทาง
+
 ### เขตเวลา
 
 ตัดวัน/เดือนด้วย `APP_TIMEZONE` (`Asia/Bangkok`) เสมอ ผ่าน `lib/dates.ts` — ห้ามใช้
