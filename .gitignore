@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+!.env.example
+
+# .next ของแอปเดิม เก็บไว้กู้โค้ด (source maps) ไม่ต้องขึ้น git
+.recovery-old-app/

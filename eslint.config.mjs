@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // .next ของแอปเดิมที่เก็บไว้กู้โค้ด ไม่ใช่ซอร์สของโปรเจกต์นี้
+    ".recovery-old-app/**",
   ]),
 ]);
 

@@ -1,0 +1,36 @@
+name: CI
+
+# ตรวจทุก push และทุก PR
+#
+# เทสต์ชุด integration ใช้ PGlite (Postgres คอมไพล์เป็น WASM) จึงไม่ต้องมี
+# service container หรือฐานข้อมูลจริงใน workflow นี้เลย
+#
+# typecheck รัน `next typegen` ก่อน เพราะชนิดของ params/layout ถูก generate
+# ตอน build ถ้าไม่ generate ก่อน tsc จะฟ้องว่าไม่รู้จัก LayoutProps
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: ตรวจชนิดข้อมูล
+        run: npm run typecheck
+
+      - name: ตรวจสไตล์โค้ด
+        run: npm run lint
+
+      - name: รันเทสต์
+        run: npm test
