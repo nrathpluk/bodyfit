@@ -42,6 +42,8 @@ export const foods = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
+    /** ชื่อไทย — คลัง USDA เป็นอังกฤษล้วน ถ้าไม่มีคอลัมน์นี้ ผู้ใช้พิมพ์ "ไข่" จะไม่เจออะไรเลย */
+    nameTh: text("name_th"),
     brand: text("brand"),
     barcode: text("barcode"),
     source: text("source").$type<FoodSource>().notNull(),
@@ -79,7 +81,10 @@ export const foodServings = pgTable(
     grams: real("grams").notNull(),
     isDefault: boolean("is_default").default(false).notNull(),
   },
-  (t) => [index("food_servings_food_id_idx").on(t.foodId)],
+  (t) => [
+    index("food_servings_food_id_idx").on(t.foodId),
+    uniqueIndex("food_servings_food_label_idx").on(t.foodId, t.label),
+  ],
 );
 
 /**
