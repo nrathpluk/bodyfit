@@ -121,3 +121,37 @@ export function ScaleIcon(props: SVGProps<SVGSVGElement>) {
     </Icon>
   );
 }
+
+export function TrendUp(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M3 17 10 10l4 4 7-7" />
+      <path d="M15 7h6v6" />
+    </Icon>
+  );
+}
+
+export function TrendDown(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M3 7 10 14l4-4 7 7" />
+      <path d="M15 17h6v-6" />
+    </Icon>
+  );
+}
+
+export function TrendFlat(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M3 12h18" />
+    </Icon>
+  );
+}
+
+export function DumbbellIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12" />
+    </Icon>
+  );
+}

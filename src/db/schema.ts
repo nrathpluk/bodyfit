@@ -3,6 +3,7 @@ import {
   boolean,
   date,
   index,
+  integer,
   jsonb,
   pgTable,
   real,
@@ -192,4 +193,45 @@ export const recipeItems = pgTable(
     sortOrder: real("sort_order").default(0).notNull(),
   },
   (t) => [index("recipe_items_recipe_idx").on(t.recipeId)],
+);
+
+/**
+ * ท่าออกกำลังกายที่ผู้ใช้บันทึก
+ *
+ * **ไม่เกี่ยวกับการคำนวณแคลอรีเลย** โดยตั้งใจ — พลังงานที่เผาจากการออกกำลังกาย
+ * ถูกคิดรวมอยู่ในตัวคูณกิจกรรมของ TDEE อยู่แล้ว (ดู lib/nutrition.ts)
+ * ถ้าเอามาบวกอีกจะนับซ้ำ และตัวเลขแคลจากเครื่องออกกำลังกายก็คลาดเคลื่อนสูงมาก
+ * ตารางนี้มีไว้ดูความก้าวหน้าของแรงอย่างเดียว
+ */
+export const exercises = pgTable(
+  "exercises",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("exercises_user_name_idx").on(t.userId, t.name)],
+);
+
+/** หนึ่งเซ็ตที่ยกจริง — น้ำหนัก × จำนวนครั้ง */
+export const workoutSets = pgTable(
+  "workout_sets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    exerciseId: uuid("exercise_id")
+      .notNull()
+      .references(() => exercises.id, { onDelete: "cascade" }),
+    /** วันตามเขตเวลาไทย เหมือนกับไดอารีอาหาร */
+    logDate: date("log_date").notNull(),
+    weightKg: real("weight_kg").notNull(),
+    reps: integer("reps").notNull(),
+    sortOrder: real("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("workout_sets_user_date_idx").on(t.userId, t.logDate),
+    index("workout_sets_exercise_idx").on(t.exerciseId, t.logDate),
+  ],
 );

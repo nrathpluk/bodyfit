@@ -131,3 +131,23 @@ export const diaryRecipeEntrySchema = z.object({
 export type RecipeInput = z.infer<typeof recipeSchema>;
 export type RecipeItemInput = z.infer<typeof recipeItemSchema>;
 export type DiaryRecipeEntryInput = z.infer<typeof diaryRecipeEntrySchema>;
+
+/**
+ * บันทึกเซ็ตที่ยก — ไม่มีช่องแคลอรีโดยตั้งใจ
+ * พลังงานที่เผาถูกคิดรวมในตัวคูณกิจกรรมของ TDEE อยู่แล้ว เอามาบวกอีกจะนับซ้ำ
+ */
+export const workoutSetSchema = z.object({
+  exerciseName: z.string().trim().min(1, "กรุณาใส่ชื่อท่า").max(80, "ชื่อท่ายาวเกินไป"),
+  logDate: dateString.default(() => today()),
+  weightKg: z.coerce
+    .number()
+    .min(0, "น้ำหนักติดลบไม่ได้")
+    .max(1000, "น้ำหนักมากเกินจริง"),
+  reps: z.coerce
+    .number()
+    .int("จำนวนครั้งต้องเป็นจำนวนเต็ม")
+    .min(1, "อย่างน้อยหนึ่งครั้ง")
+    .max(100, "จำนวนครั้งมากเกินจริง"),
+});
+
+export type WorkoutSetInput = z.infer<typeof workoutSetSchema>;
