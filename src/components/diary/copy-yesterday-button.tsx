@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { copyYesterdayAction } from "@/app/diary/actions";
+import { copyYesterdayAction } from "@/app/(app)/diary/actions";
 
 /** ทางลัดสำหรับคนกินเมนูซ้ำ ๆ — บันทึกทั้งวันในแตะเดียว */
 export function CopyYesterdayButton({ date }: { date: string }) {

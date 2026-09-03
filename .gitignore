@@ -43,3 +43,7 @@ next-env.d.ts
 
 # .next ของแอปเดิม เก็บไว้กู้โค้ด (source maps) ไม่ต้องขึ้น git
 .recovery-old-app/
+
+# ไบต์โค้ดของสคริปต์ใน skill — สร้างใหม่ได้เอง ไม่ต้องขึ้น git
+__pycache__/
+*.pyc

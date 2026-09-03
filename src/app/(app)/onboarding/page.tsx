@@ -1,3 +1,4 @@
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ProfileForm } from "@/components/profile-form";
 import { requireUser } from "@/lib/auth";
 import { getLatestWeight, getProfile } from "@/lib/profile";
@@ -30,6 +31,9 @@ export default async function OnboardingPage() {
           rateKgPerWeek: profile?.rateKgPerWeek,
         }}
       />
+      <div className="mt-10 border-t border-line pt-6 text-center">
+        <SignOutButton />
+      </div>
     </main>
   );
 }

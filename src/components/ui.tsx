@@ -18,7 +18,7 @@ export function Button({ variant = "primary", className = "", ...props }: Button
   return (
     <button
       {...props}
-      className={`min-h-[48px] w-full rounded-xl px-4 text-base font-medium transition disabled:cursor-not-allowed ${styles} ${className}`}
+      className={`min-h-[48px] w-full rounded-xl px-4 text-base font-medium transition-colors duration-200 disabled:cursor-not-allowed ${styles} ${className}`}
     />
   );
 }
@@ -44,8 +44,9 @@ export function Field({
   );
 }
 
+// ไม่ปิด outline ทิ้ง — :focus-visible ใน globals.css เป็นคนวาดเส้นโฟกัสให้
 const controlClass =
-  "min-h-[48px] w-full rounded-xl border border-line bg-surface px-3 text-foreground outline-none focus:border-brand";
+  "min-h-[48px] w-full rounded-xl border border-line bg-surface px-3 text-foreground transition-colors duration-200 focus:border-brand";
 
 export function Input({ className = "", ...props }: ComponentProps<"input">) {
   return <input {...props} className={`${controlClass} ${className}`} />;

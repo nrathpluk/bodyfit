@@ -55,3 +55,39 @@ select,
 textarea {
   font-size: 16px;
 }
+
+/*
+ * โฟกัสต้องมองเห็นได้เสมอ — ผู้ใช้คีย์บอร์ดและผู้ใช้ที่ใช้ปุ่ม Tab บนมือถือ
+ * จะหลงทางทันทีถ้าไม่มีเส้นบอกตำแหน่ง ใช้ :focus-visible เพื่อไม่ให้เส้นขึ้นตอนคลิกเมาส์
+ */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+ * เคารพการตั้งค่า "ลดการเคลื่อนไหว" ของเครื่อง
+ * ผู้ใช้บางคนเวียนหัวจากแอนิเมชัน และเป็นข้อกำหนดของ WCAG
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Tailwind v4 ไม่ตั้ง cursor: pointer ให้ปุ่มเองแล้ว ต้องตั้งเอง */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

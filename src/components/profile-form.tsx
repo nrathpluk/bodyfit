@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { saveProfileAction, type ProfileFormState } from "@/app/onboarding/actions";
+import { saveProfileAction, type ProfileFormState } from "@/app/(app)/onboarding/actions";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { ACTIVITY_LABELS } from "@/lib/nutrition";
 import type { ActivityLevel, Goal, Sex } from "@/lib/types";

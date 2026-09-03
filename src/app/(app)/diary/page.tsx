@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CopyYesterdayButton } from "@/components/diary/copy-yesterday-button";
+import { ChevronLeft, ChevronRight } from "@/components/icons";
 import { DaySummary } from "@/components/diary/day-summary";
 import { MealSection } from "@/components/diary/meal-section";
 import { MicroList } from "@/components/diary/micro-list";
@@ -22,14 +23,15 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
   const isEmpty = MEAL_SLOTS.every((meal) => day.entriesByMeal[meal].length === 0);
 
   return (
-    <main className="mx-auto w-full max-w-md space-y-4 px-5 py-6 pb-16">
-      <header className="flex items-center justify-between gap-2">
+    <main className="mx-auto w-full max-w-md space-y-4 px-5 pb-6">
+      {/* ตรึงหัววันไว้ด้านบน เพื่อให้เลื่อนดูมื้อล่าง ๆ แล้วยังรู้ว่ากำลังดูวันไหนอยู่ */}
+      <header className="sticky top-0 z-30 -mx-5 flex items-center justify-between gap-2 border-b border-line bg-background px-5 py-3">
         <Link
           href={`/diary?date=${addDays(date, -1)}`}
-          className="min-h-[44px] px-2 py-2 text-muted"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:text-foreground"
           aria-label="วันก่อนหน้า"
         >
-          ←
+          <ChevronLeft className="h-5 w-5" />
         </Link>
         <div className="text-center">
           <p className="font-medium">{formatThaiDate(date)}</p>
@@ -41,10 +43,10 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
         </div>
         <Link
           href={`/diary?date=${addDays(date, 1)}`}
-          className="min-h-[44px] px-2 py-2 text-muted"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:text-foreground"
           aria-label="วันถัดไป"
         >
-          →
+          <ChevronRight className="h-5 w-5" />
         </Link>
       </header>
 
@@ -62,13 +64,12 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
 
       <MicroList micros={day.totals.micros} />
 
-      {isEmpty && <CopyYesterdayButton date={date} />}
-
-      <nav className="pt-2 text-center text-sm">
-        <Link href="/dashboard" className="text-muted underline underline-offset-4">
-          กลับหน้าสรุป
-        </Link>
-      </nav>
+      {isEmpty && (
+        <div className="space-y-3 rounded-2xl border border-dashed border-line px-5 py-6 text-center">
+          <p className="text-sm text-muted">วันนี้ยังไม่ได้บันทึกอะไร</p>
+          <CopyYesterdayButton date={date} />
+        </div>
+      )}
     </main>
   );
 }

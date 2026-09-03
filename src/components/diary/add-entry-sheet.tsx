@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { addFoodAction, addQuickAction } from "@/app/diary/actions";
+import { addFoodAction, addQuickAction } from "@/app/(app)/diary/actions";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
+import { Close, Plus, ScanIcon } from "@/components/icons";
 import { BarcodeScanner, type ScannedFood } from "./barcode-scanner";
 import type { MealSlot } from "@/lib/types";
 import { MEAL_LABELS } from "@/lib/types";
@@ -32,9 +33,10 @@ export function AddEntrySheet({ meal, date }: { meal: MealSlot; date: string }) 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="min-h-[44px] w-full rounded-xl border border-dashed border-line text-sm text-muted transition hover:border-brand hover:text-brand"
+        className="flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-line text-sm text-muted transition-colors duration-200 hover:border-brand hover:text-brand"
       >
-        + เพิ่มอาหาร
+        <Plus className="h-4 w-4" />
+        เพิ่มอาหาร
       </button>
       {open && <Sheet meal={meal} date={date} onClose={() => setOpen(false)} />}
     </>
@@ -100,8 +102,13 @@ function Sheet({
         <h2 className="text-base font-medium">
           เพิ่มลง{MEAL_LABELS[meal]}
         </h2>
-        <button type="button" onClick={onClose} className="min-h-[44px] px-2 text-sm text-muted">
-          ปิด
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="ปิด"
+          className="min-h-[44px] min-w-[44px] rounded-lg px-2 text-muted transition-colors duration-200 hover:text-foreground"
+        >
+          <Close className="mx-auto h-5 w-5" />
         </button>
       </header>
 
@@ -146,8 +153,9 @@ function Sheet({
                 type="button"
                 onClick={() => setScanMode(true)}
                 aria-label="สแกนบาร์โค้ด"
-                className="min-h-[48px] shrink-0 rounded-xl border border-line px-4 text-sm"
+                className="flex min-h-[48px] shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-line px-4 text-sm transition-colors duration-200 hover:border-brand hover:text-brand"
               >
+                <ScanIcon className="h-4 w-4" />
                 สแกน
               </button>
             </div>

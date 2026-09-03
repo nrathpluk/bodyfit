@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { deleteEntryAction } from "@/app/diary/actions";
+import { deleteEntryAction } from "@/app/(app)/diary/actions";
+import { Trash } from "@/components/icons";
 
 export function EntryRow({
   id,
@@ -28,9 +29,9 @@ export function EntryRow({
         aria-label={`ลบ ${name}`}
         disabled={pending}
         onClick={() => startTransition(async () => void (await deleteEntryAction(id)))}
-        className="min-h-[44px] shrink-0 px-2 text-muted"
+        className="min-h-[44px] min-w-[44px] shrink-0 rounded-lg px-2 text-muted transition-colors duration-200 hover:text-danger"
       >
-        ✕
+        <Trash className="mx-auto h-4 w-4" />
       </button>
     </li>
   );
