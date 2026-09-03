@@ -1,52 +1,84 @@
 @import "tailwindcss";
 
 /*
- * ธีมของแอป — เขียว = พลังงาน/อาหาร, ใช้โทนเดียวทั้งแอป
- * ไม่ใช้ next/font เพราะฟอนต์ไทยของระบบ (iOS/Android) อ่านง่ายและไม่ต้องโหลดเพิ่ม
- * ซึ่งสำคัญกับผู้ใช้มือถือที่เน็ตช้า
+ * ระบบสีของแอป — "กระดาษ หมึก และสีที่มีความหมาย"
+ *
+ * หลักที่ยึด: **สีสดสงวนไว้ให้ข้อมูลเท่านั้น** ส่วนของหน้าจอ (ปุ่ม เมนู ขอบ พื้นหลัง)
+ * เป็นกระดาษกับหมึกล้วน เพราะถ้าปุ่มก็สี เมนูก็สี แถบสารอาหารก็สี สายตาจะไม่รู้ว่า
+ * สีไหนแปลว่าอะไร — พอมีสีอยู่แค่สามจุดในหน้า สมองจะจับได้ทันทีว่าสีคือข้อมูล
+ *
+ * โทนกลางเป็นโทนอุ่น (#f9f9f7 ไม่ใช่เทาเย็น) ให้ความรู้สึกเหมือนกระดาษจริง
+ * และทำให้สีข้อมูลทั้งสามเด่นขึ้นโดยไม่ต้องเพิ่มความสด
  */
 :root {
-  --background: #f7f8f7;
-  --surface: #ffffff;
-  --foreground: #14181a;
-  --muted: #5f6b70;
-  --border: #e2e6e4;
-  --brand: #16a34a;
-  --brand-strong: #15803d;
-  --danger: #dc2626;
+  --paper: #f9f9f7;
+  --surface: #fcfcfb;
+  --sunken: #f0efec;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --ink-3: #898781;
+  --line: #e1e0d9;
+  --line-strong: #c3c2b7;
+
+  /*
+   * สีของสารอาหารหลัก — ชุดนี้ผ่านการตรวจด้วย validate_palette.js ทั้งสองโหมด
+   * ทั้งเรื่องระยะห่างสำหรับคนตาบอดสี (CVD ΔE) และความต่างสำหรับคนสายตาปกติ
+   * ห้ามเปลี่ยนสีทีละตัวโดยไม่รันตรวจใหม่ — ชุดสีม่วงที่ลองก่อนหน้านี้
+   * ผ่านโหมดสว่างแต่พังในโหมดมืด (ม่วงกับน้ำเงินห่างกัน ΔE 1.9)
+   */
+  --protein: #2a78d6;
+  --carb: #eb6834;
+  --fat: #1baf7a;
+
+  --good: #0ca30c;
+  --critical: #d03b3b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0d1210;
-    --surface: #151b18;
-    --foreground: #e9efec;
-    --muted: #9aa8a2;
-    --border: #26302b;
-    --brand: #22c55e;
-    --brand-strong: #4ade80;
-    --danger: #f87171;
+    --paper: #0d0d0d;
+    --surface: #1a1a19;
+    --sunken: #232321;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --ink-3: #898781;
+    --line: #2c2c2a;
+    --line-strong: #383835;
+
+    /* สเต็ปสำหรับพื้นมืดโดยเฉพาะ ไม่ใช่การกลับด้านสีของโหมดสว่าง */
+    --protein: #3987e5;
+    --carb: #d95926;
+    --fat: #199e70;
   }
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-paper: var(--paper);
   --color-surface: var(--surface);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-line: var(--border);
-  --color-brand: var(--brand);
-  --color-brand-strong: var(--brand-strong);
-  --color-danger: var(--danger);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-protein: var(--protein);
+  --color-carb: var(--carb);
+  --color-fat: var(--fat);
+  --color-good: var(--good);
+  --color-critical: var(--critical);
+  --font-sans: var(--font-plex-thai);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: "IBM Plex Sans Thai", "Noto Sans Thai", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", "Helvetica Neue", sans-serif;
-  /* กันหน้าเด้งตอนคีย์บอร์ดมือถือเปิด */
+  background: var(--paper);
+  color: var(--ink);
   -webkit-text-size-adjust: 100%;
+}
+
+/* ตัวเลขทุกตัวในแอปต้องกว้างเท่ากัน ไม่งั้นยอดที่นับขึ้นจะกระตุกซ้ายขวา */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 /* iOS ซูมหน้าเองเมื่อ input มีขนาดตัวอักษรต่ำกว่า 16px */
@@ -57,19 +89,15 @@ textarea {
 }
 
 /*
- * โฟกัสต้องมองเห็นได้เสมอ — ผู้ใช้คีย์บอร์ดและผู้ใช้ที่ใช้ปุ่ม Tab บนมือถือ
- * จะหลงทางทันทีถ้าไม่มีเส้นบอกตำแหน่ง ใช้ :focus-visible เพื่อไม่ให้เส้นขึ้นตอนคลิกเมาส์
+ * โฟกัสต้องมองเห็นได้เสมอ ใช้ :focus-visible เพื่อไม่ให้เส้นขึ้นตอนคลิกเมาส์
+ * เส้นเป็นสีหมึก ไม่ใช่สีข้อมูล ตามกฎที่ว่าสีสดสงวนไว้ให้ข้อมูล
  */
 :focus-visible {
-  outline: 2px solid var(--brand);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-/*
- * เคารพการตั้งค่า "ลดการเคลื่อนไหว" ของเครื่อง
- * ผู้ใช้บางคนเวียนหัวจากแอนิเมชัน และเป็นข้อกำหนดของ WCAG
- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

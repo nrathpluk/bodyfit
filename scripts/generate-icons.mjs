@@ -11,8 +11,16 @@ import { deflateSync } from "node:zlib";
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 
-const BRAND = [22, 163, 74]; // #16a34a เขียวเดียวกับ --brand ในธีมสว่าง
-const WHITE = [255, 255, 255];
+/*
+ * พื้นหมึกกับแท่งสามสีของสารอาหาร (โปรตีน/คาร์บ/ไขมัน) ชุดเดียวกับที่ใช้ในแอป
+ * ไอคอนจึงเป็นตัวอย่างย่อของภาษาสีที่ผู้ใช้จะเจอข้างใน ไม่ใช่โลโก้ที่ไม่เกี่ยวกับอะไรเลย
+ */
+const BG = [11, 11, 11];
+const BARS = [
+  [42, 120, 214], // โปรตีน #2a78d6
+  [235, 104, 52], // คาร์บ #eb6834
+  [27, 175, 122], // ไขมัน #1baf7a
+];
 
 const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
   let c = n;
@@ -89,22 +97,23 @@ function drawIcon(size) {
       const px = (x + 0.5) / s;
       const py = (y + 0.5) / s;
 
-      let color = BRAND;
-      let alpha = 255;
+      let color = BG;
+      const alpha = 255;
 
-      for (const bar of bars) {
+      bars.forEach((bar, index) => {
+        if (color !== BG) return;
         const d = roundedRectDistance(px, py, bar.x, bar.y, bar.w, bar.h, 18);
         if (d < 0.5) {
           // ไล่ความทึบตรงขอบ 1 px เพื่อไม่ให้เห็นรอยหยัก
           const coverage = Math.min(1, Math.max(0, 0.5 - d));
+          const fill = BARS[index];
           color = [
-            Math.round(BRAND[0] + (WHITE[0] - BRAND[0]) * coverage),
-            Math.round(BRAND[1] + (WHITE[1] - BRAND[1]) * coverage),
-            Math.round(BRAND[2] + (WHITE[2] - BRAND[2]) * coverage),
+            Math.round(BG[0] + (fill[0] - BG[0]) * coverage),
+            Math.round(BG[1] + (fill[1] - BG[1]) * coverage),
+            Math.round(BG[2] + (fill[2] - BG[2]) * coverage),
           ];
-          break;
         }
-      }
+      });
 
       rgba[i] = color[0];
       rgba[i + 1] = color[1];

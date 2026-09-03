@@ -108,7 +108,7 @@ export function EditEntrySheet({
         <form action={(formData) => submit(formData, updateAmountAction)} className="space-y-5">
           <input type="hidden" name="entryId" value={entry.id} />
 
-          <p className="text-sm text-muted">
+          <p className="text-sm text-ink-3">
             ตอนนี้บันทึกไว้ {entry.servingLabel ? localizeServingLabel(entry.servingLabel) : ""}
             {entry.grams ? ` (${Math.round(entry.grams)} กรัม)` : ""} · {Math.round(entry.kcal)} kcal
           </p>
@@ -118,14 +118,14 @@ export function EditEntrySheet({
               <button
                 type="button"
                 onClick={() => setUseServing(true)}
-                className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-brand bg-brand text-white" : "border-line"}`}
+                className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-ink bg-ink text-paper" : "border-line"}`}
               >
                 หน่วยครัว
               </button>
               <button
                 type="button"
                 onClick={() => setUseServing(false)}
-                className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-line" : "border-brand bg-brand text-white"}`}
+                className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-line" : "border-ink bg-ink text-paper"}`}
               >
                 ชั่งเป็นกรัม
               </button>

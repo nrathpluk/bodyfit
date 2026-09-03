@@ -20,11 +20,11 @@ export function EntryRow({ entry }: { entry: EditableEntry }) {
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="flex min-h-[52px] flex-1 items-center gap-3 rounded-lg py-2 text-left transition-colors duration-200 hover:bg-background"
+        className="flex min-h-[52px] flex-1 items-center gap-3 rounded-lg py-2 text-left transition-colors duration-200 hover:bg-sunken"
       >
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm">{entry.name}</span>
-          {detail && <span className="block truncate text-xs text-muted">{detail}</span>}
+          {detail && <span className="block truncate text-xs text-ink-3">{detail}</span>}
         </span>
         <span className="shrink-0 text-sm tabular-nums">
           {Math.round(entry.kcal).toLocaleString("th-TH")}
@@ -36,7 +36,7 @@ export function EntryRow({ entry }: { entry: EditableEntry }) {
         aria-label={`ลบ ${entry.name}`}
         disabled={pending}
         onClick={() => startTransition(async () => void (await deleteEntryAction(entry.id)))}
-        className="min-h-[44px] min-w-[44px] shrink-0 rounded-lg text-muted transition-colors duration-200 hover:text-danger"
+        className="min-h-[44px] min-w-[44px] shrink-0 rounded-lg text-ink-3 transition-colors duration-200 hover:text-critical"
       >
         <Trash className="mx-auto h-4 w-4" />
       </button>

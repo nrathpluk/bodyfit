@@ -119,7 +119,7 @@ export function BarcodeScanner({
 
   return (
     <div className="space-y-4">
-      <button type="button" onClick={onCancel} className="text-sm text-muted">
+      <button type="button" onClick={onCancel} className="text-sm text-ink-3">
         ← กลับไปค้นหา
       </button>
 
@@ -135,7 +135,7 @@ export function BarcodeScanner({
         )
       )}
 
-      {status && <p className="text-sm text-muted">{status}</p>}
+      {status && <p className="text-sm text-ink-3">{status}</p>}
 
       <form
         action={(formData) => {

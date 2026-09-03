@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui";
+import { Card, Eyebrow } from "@/components/ui";
 import { AddEntrySheet } from "./add-entry-sheet";
 import { EntryRow } from "./entry-row";
 import type { DiaryEntry } from "@/lib/diary";
@@ -18,10 +18,11 @@ export function MealSection({
 }) {
   return (
     <Card className="space-y-3">
-      <div className="flex items-baseline justify-between">
-        <h2 className="font-medium">{MEAL_LABELS[meal]}</h2>
-        <span className="text-sm tabular-nums text-muted">
-          {Math.round(totals.kcal).toLocaleString("th-TH")} kcal
+      <div className="flex items-center justify-between gap-3">
+        <Eyebrow>{MEAL_LABELS[meal]}</Eyebrow>
+        <span className="tnum text-sm text-ink-2">
+          {Math.round(totals.kcal).toLocaleString("th-TH")}
+          <span className="text-ink-3"> kcal</span>
         </span>
       </div>
 

@@ -24,9 +24,11 @@ export function AppNav() {
   return (
     <nav
       aria-label="เมนูหลัก"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:inset-y-0 lg:right-auto lg:w-56 lg:border-t-0 lg:border-r lg:pb-0"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 backdrop-blur pb-[env(safe-area-inset-bottom)] lg:inset-y-0 lg:right-auto lg:w-56 lg:border-t-0 lg:border-r lg:bg-surface lg:backdrop-blur-none lg:pb-0"
     >
-      <p className="hidden px-5 py-6 text-lg font-semibold tracking-tight lg:block">Bodymefit</p>
+      <p className="hidden px-5 py-7 text-[17px] font-semibold tracking-tight lg:block">
+        Bodymefit
+      </p>
 
       <ul className="mx-auto flex max-w-md lg:mx-0 lg:max-w-none lg:flex-col lg:gap-1 lg:px-3">
         {TABS.map(({ href, label, Icon }) => {
@@ -36,12 +38,16 @@ export function AppNav() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-[56px] cursor-pointer flex-col items-center justify-center gap-1 text-xs transition-colors duration-200 lg:min-h-[48px] lg:flex-row lg:justify-start lg:gap-3 lg:rounded-xl lg:px-3 lg:text-sm ${
+                className={`relative flex min-h-[56px] cursor-pointer flex-col items-center justify-center gap-1 text-[11px] transition-colors duration-200 lg:min-h-[46px] lg:flex-row lg:justify-start lg:gap-3 lg:rounded-xl lg:px-3 lg:text-sm ${
                   active
-                    ? "text-brand lg:bg-brand/10"
-                    : "text-muted hover:text-foreground lg:hover:bg-background"
+                    ? "font-medium text-ink lg:bg-sunken"
+                    : "text-ink-3 hover:text-ink lg:hover:bg-sunken"
                 }`}
               >
+                {/* ขีดบนหัวแท็บบอกตำแหน่งซ้ำอีกชั้น ไม่ให้ความหมายอยู่ที่สีอย่างเดียว */}
+                {active && (
+                  <span className="absolute inset-x-5 top-0 h-0.5 rounded-b bg-ink lg:hidden" />
+                )}
                 <Icon className="h-5 w-5 shrink-0" />
                 {label}
               </Link>

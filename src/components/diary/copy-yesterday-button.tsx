@@ -19,11 +19,11 @@ export function CopyYesterdayButton({ date }: { date: string }) {
             setMessage(result.ok ? null : result.message);
           })
         }
-        className="min-h-[44px] text-sm text-brand underline underline-offset-4 disabled:opacity-50"
+        className="min-h-[44px] text-sm text-ink underline underline-offset-4 disabled:opacity-50"
       >
         {pending ? "กำลังคัดลอก…" : "คัดลอกทุกมื้อจากเมื่อวาน"}
       </button>
-      {message && <p className="text-xs text-muted">{message}</p>}
+      {message && <p className="text-xs text-ink-3">{message}</p>}
     </div>
   );
 }

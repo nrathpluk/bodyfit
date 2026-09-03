@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { addFoodAction, addQuickAction, repeatEntryAction } from "@/app/(app)/diary/actions";
-import { Alert, Button, Field, Input, Select } from "@/components/ui";
+import { Alert, Button, Eyebrow, Field, Input, Select } from "@/components/ui";
 import { Plus, ScanIcon } from "@/components/icons";
 import { localizeServingLabel } from "@/lib/servings";
 import type { MealSlot } from "@/lib/types";
@@ -43,7 +43,7 @@ export function AddEntrySheet({ meal, date }: { meal: MealSlot; date: string }) 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-line text-sm text-muted transition-colors duration-200 hover:border-brand hover:text-brand"
+        className="flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-line text-sm text-ink-3 transition-colors duration-200 hover:border-line-strong hover:text-ink"
       >
         <Plus className="h-4 w-4" />
         เพิ่มอาหาร
@@ -172,7 +172,7 @@ function Sheet({
               type="button"
               onClick={() => setScanMode(true)}
               aria-label="สแกนบาร์โค้ด"
-              className="flex min-h-[48px] shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-line px-4 text-sm transition-colors duration-200 hover:border-brand hover:text-brand"
+              className="flex min-h-[48px] shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-line px-4 text-sm transition-colors duration-200 hover:border-line-strong hover:text-ink"
             >
               <ScanIcon className="h-4 w-4" />
               สแกน
@@ -181,7 +181,10 @@ function Sheet({
 
           {showRecents && (
             <section>
-              <h3 className="mb-1 text-xs font-medium text-muted">กินล่าสุด — แตะเพื่อบันทึกซ้ำ</h3>
+              <div className="mb-1.5">
+                <Eyebrow>กินล่าสุด</Eyebrow>
+                <p className="mt-0.5 text-xs text-ink-3">แตะรายการเพื่อบันทึกซ้ำได้เลย</p>
+              </div>
               <ul className="divide-y divide-line">
                 {recents.map((recent) => (
                   <li key={recent.sourceEntryId}>
@@ -189,11 +192,11 @@ function Sheet({
                       type="button"
                       disabled={pending}
                       onClick={() => repeat(recent)}
-                      className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left transition-colors duration-200 hover:bg-background disabled:opacity-50"
+                      className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left transition-colors duration-200 hover:bg-sunken disabled:opacity-50"
                     >
                       <span className="min-w-0">
                         <span className="block truncate text-sm">{recent.name}</span>
-                        <span className="block truncate text-xs text-muted">
+                        <span className="block truncate text-xs text-ink-3">
                           {recent.servingLabel
                             ? localizeServingLabel(recent.servingLabel)
                             : recent.grams
@@ -201,7 +204,7 @@ function Sheet({
                               : "กรอกเอง"}
                         </span>
                       </span>
-                      <span className="shrink-0 text-sm tabular-nums text-muted">
+                      <span className="shrink-0 text-sm tabular-nums text-ink-3">
                         {Math.round(recent.kcal).toLocaleString("th-TH")} kcal
                       </span>
                     </button>
@@ -211,10 +214,10 @@ function Sheet({
             </section>
           )}
 
-          {searching && <p className="text-sm text-muted">กำลังค้นหา…</p>}
+          {searching && <p className="text-sm text-ink-3">กำลังค้นหา…</p>}
 
           {!searching && query.trim().length >= 2 && results.length === 0 && (
-            <p className="text-sm text-muted">ไม่พบอาหารที่ค้นหา</p>
+            <p className="text-sm text-ink-3">ไม่พบอาหารที่ค้นหา</p>
           )}
 
           <ul className="divide-y divide-line">
@@ -223,22 +226,22 @@ function Sheet({
                 <button
                   type="button"
                   onClick={() => selectFood(food)}
-                  className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left transition-colors duration-200 hover:bg-background"
+                  className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left transition-colors duration-200 hover:bg-sunken"
                 >
                   <span className="min-w-0">
                     <span className="block truncate text-sm">
                       {food.nameTh ?? food.name}
                       {food.verified === false && (
-                        <span className="ml-1.5 align-middle text-[10px] text-muted">
+                        <span className="ml-1.5 align-middle text-[10px] text-ink-3">
                           ข้อมูลจากผู้ใช้
                         </span>
                       )}
                     </span>
                     {food.nameTh && (
-                      <span className="block truncate text-xs text-muted">{food.name}</span>
+                      <span className="block truncate text-xs text-ink-3">{food.name}</span>
                     )}
                   </span>
-                  <span className="shrink-0 text-sm tabular-nums text-muted">
+                  <span className="shrink-0 text-sm tabular-nums text-ink-3">
                     {Math.round(food.kcalPer100g)} kcal/100ก.
                   </span>
                 </button>
@@ -249,7 +252,7 @@ function Sheet({
           <button
             type="button"
             onClick={() => setQuickMode(true)}
-            className="cursor-pointer text-sm text-brand underline underline-offset-4"
+            className="cursor-pointer text-sm text-ink underline underline-offset-4"
           >
             ไม่มีในคลัง — กรอกแคลเอง
           </button>
@@ -289,11 +292,11 @@ function QuantityForm({
       <input type="hidden" name="foodId" value={food.id} />
 
       <div>
-        <button type="button" onClick={onBack} className="cursor-pointer text-sm text-muted">
+        <button type="button" onClick={onBack} className="cursor-pointer text-sm text-ink-3">
           ← เลือกอาหารอื่น
         </button>
         <h3 className="mt-2 text-lg font-medium">{food.nameTh ?? food.name}</h3>
-        <p className="text-sm text-muted">{Math.round(food.kcalPer100g)} kcal ต่อ 100 กรัม</p>
+        <p className="text-sm text-ink-3">{Math.round(food.kcalPer100g)} kcal ต่อ 100 กรัม</p>
       </div>
 
       {food.servings.length > 0 && (
@@ -301,14 +304,14 @@ function QuantityForm({
           <button
             type="button"
             onClick={() => setUseServing(true)}
-            className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-brand bg-brand text-white" : "border-line"}`}
+            className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-ink bg-ink text-paper" : "border-line"}`}
           >
             หน่วยครัว
           </button>
           <button
             type="button"
             onClick={() => setUseServing(false)}
-            className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-line" : "border-brand bg-brand text-white"}`}
+            className={`min-h-[44px] cursor-pointer rounded-xl border text-sm transition-colors duration-200 ${useServing ? "border-line" : "border-ink bg-ink text-paper"}`}
           >
             ชั่งเป็นกรัม
           </button>
@@ -376,7 +379,7 @@ function QuickForm({
       <input type="hidden" name="entryDate" value={date} />
       <input type="hidden" name="meal" value={meal} />
 
-      <button type="button" onClick={onBack} className="cursor-pointer text-sm text-muted">
+      <button type="button" onClick={onBack} className="cursor-pointer text-sm text-ink-3">
         ← กลับไปค้นหา
       </button>
 

@@ -101,8 +101,8 @@ export function ProfileForm({ defaults = {} }: { defaults?: ProfileDefaults }) {
               onClick={() => setGoal(option)}
               className={`min-h-[48px] rounded-xl border text-sm font-medium transition ${
                 goal === option
-                  ? "border-brand bg-brand text-white"
-                  : "border-line bg-surface text-foreground"
+                  ? "border-ink bg-ink text-paper"
+                  : "border-line bg-surface text-ink"
               }`}
             >
               {GOAL_LABELS[option]}

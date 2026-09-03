@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DaySummary } from "@/components/diary/day-summary";
 import { MicroList } from "@/components/diary/micro-list";
-import { Card } from "@/components/ui";
+import { Card, Eyebrow } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { formatThaiDate, today } from "@/lib/dates";
 import { loadDay } from "@/lib/diary";
@@ -20,9 +20,9 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto w-full max-w-md space-y-4 px-5 py-6 md:max-w-2xl xl:max-w-5xl">
-      <header>
-        <p className="text-sm text-muted">{formatThaiDate(date)}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">
+      <header className="space-y-1.5 pt-2">
+        <Eyebrow>{formatThaiDate(date)}</Eyebrow>
+        <h1 className="text-[26px] font-semibold leading-tight tracking-tight">
           {profile.displayName ? `สวัสดี ${profile.displayName}` : "วันนี้กินอะไรบ้าง"}
         </h1>
       </header>
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
 
           <Link
             href="/diary"
-            className="block min-h-[52px] cursor-pointer rounded-2xl bg-brand px-4 py-4 text-center font-medium text-white transition-colors duration-200 hover:bg-brand-strong"
+            className="block min-h-[52px] cursor-pointer rounded-2xl bg-ink px-4 py-4 text-center text-[15px] font-medium text-paper transition-opacity duration-200 hover:opacity-90"
           >
             บันทึกอาหารวันนี้
           </Link>
@@ -43,11 +43,11 @@ export default async function DashboardPage() {
         <div className="mt-4 space-y-4 xl:mt-0">
           <MicroList micros={day.totals.micros} />
           <Card>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-ink-3">
               พลังงานพื้นฐาน (BMR) {day.target.basis.bmr.toLocaleString("th-TH")} kcal ·
               ใช้จริงต่อวัน (TDEE) {day.target.basis.tdee.toLocaleString("th-TH")} kcal
             </p>
-            <p className="mt-2 text-xs text-muted">
+            <p className="mt-2 text-xs text-ink-3">
               คิดจากน้ำหนัก {day.target.basis.weightKg} กก. อายุ {day.target.basis.ageYears} ปี
               ด้วยสูตร Mifflin-St Jeor
             </p>

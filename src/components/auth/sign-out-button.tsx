@@ -18,7 +18,7 @@ export function SignOutButton() {
         router.push("/login");
         router.refresh();
       }}
-      className="text-sm text-muted underline underline-offset-4 disabled:opacity-50"
+      className="text-sm text-ink-3 underline underline-offset-4 disabled:opacity-50"
     >
       {pending ? "กำลังออก…" : "ออกจากระบบ"}
     </button>

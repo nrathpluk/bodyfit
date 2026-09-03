@@ -42,14 +42,14 @@ export function SheetShell({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background md:items-center md:justify-center md:bg-black/50 md:p-6">
+    <div className="fixed inset-0 z-50 flex flex-col bg-paper md:items-center md:justify-center md:bg-black/50 md:p-6">
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="flex h-full w-full flex-col bg-background outline-none md:h-auto md:max-h-[85vh] md:max-w-lg md:overflow-hidden md:rounded-2xl md:border md:border-line md:shadow-xl"
+        className="flex h-full w-full flex-col bg-paper outline-none md:h-auto md:max-h-[85vh] md:max-w-lg md:overflow-hidden md:rounded-2xl md:border md:border-line md:shadow-xl"
       >
         <header className="flex items-center justify-between border-b border-line px-5 py-4">
           <h2 className="truncate text-base font-medium">{title}</h2>
@@ -57,7 +57,7 @@ export function SheetShell({
             type="button"
             onClick={onClose}
             aria-label="ปิด"
-            className="min-h-[44px] min-w-[44px] shrink-0 rounded-lg px-2 text-muted transition-colors duration-200 hover:text-foreground"
+            className="min-h-[44px] min-w-[44px] shrink-0 rounded-lg px-2 text-ink-3 transition-colors duration-200 hover:text-ink"
           >
             <Close className="mx-auto h-5 w-5" />
           </button>

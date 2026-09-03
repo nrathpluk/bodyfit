@@ -113,7 +113,7 @@ function ModeTab({
       type="button"
       onClick={onClick}
       className={`min-h-[44px] rounded-lg text-sm font-medium transition ${
-        active ? "bg-brand text-white" : "text-muted"
+        active ? "bg-ink text-paper" : "text-ink-3"
       }`}
     >
       {children}

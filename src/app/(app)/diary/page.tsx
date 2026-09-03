@@ -25,10 +25,10 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
   return (
     <main className="mx-auto w-full max-w-md px-5 pb-6 md:max-w-2xl xl:max-w-5xl">
       {/* ตรึงหัววันไว้ด้านบน เพื่อให้เลื่อนดูมื้อล่าง ๆ แล้วยังรู้ว่ากำลังดูวันไหนอยู่ */}
-      <header className="sticky top-0 z-30 -mx-5 flex items-center justify-between gap-2 border-b border-line bg-background px-5 py-3">
+      <header className="sticky top-0 z-30 -mx-5 flex items-center justify-between gap-2 border-b border-line bg-paper px-5 py-3">
         <Link
           href={`/diary?date=${addDays(date, -1)}`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:text-foreground"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-ink-3 transition-colors duration-200 hover:text-ink"
           aria-label="วันก่อนหน้า"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -36,14 +36,14 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
         <div className="text-center">
           <p className="font-medium">{formatThaiDate(date)}</p>
           {date !== today() && (
-            <Link href="/diary" className="text-xs text-brand underline underline-offset-4">
+            <Link href="/diary" className="text-xs text-ink underline underline-offset-4">
               กลับมาวันนี้
             </Link>
           )}
         </div>
         <Link
           href={`/diary?date=${addDays(date, 1)}`}
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:text-foreground"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-ink-3 transition-colors duration-200 hover:text-ink"
           aria-label="วันถัดไป"
         >
           <ChevronRight className="h-5 w-5" />
@@ -74,7 +74,7 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
 
           {isEmpty && (
             <div className="space-y-3 rounded-2xl border border-dashed border-line px-5 py-6 text-center">
-              <p className="text-sm text-muted">วันนี้ยังไม่ได้บันทึกอะไร</p>
+              <p className="text-sm text-ink-3">วันนี้ยังไม่ได้บันทึกอะไร</p>
               <CopyYesterdayButton date={date} />
             </div>
           )}
