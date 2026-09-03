@@ -3,7 +3,6 @@ import { AddEntrySheet } from "./add-entry-sheet";
 import { EntryRow } from "./entry-row";
 import type { DiaryEntry } from "@/lib/diary";
 import type { Nutrients } from "@/lib/nutrition";
-import { localizeServingLabel } from "@/lib/servings";
 import { MEAL_LABELS, type MealSlot } from "@/lib/types";
 
 export function MealSection({
@@ -31,13 +30,17 @@ export function MealSection({
           {entries.map((entry) => (
             <EntryRow
               key={entry.id}
-              id={entry.id}
-              name={entry.name}
-              detail={
-                (entry.servingLabel ? localizeServingLabel(entry.servingLabel) : null) ??
-                (entry.grams ? `${Math.round(entry.grams)} กรัม` : null)
-              }
-              kcal={entry.kcal}
+              entry={{
+                id: entry.id,
+                name: entry.name,
+                foodId: entry.foodId,
+                grams: entry.grams,
+                servingLabel: entry.servingLabel,
+                kcal: entry.kcal,
+                protein: entry.protein,
+                carb: entry.carb,
+                fat: entry.fat,
+              }}
             />
           ))}
         </ul>

@@ -12,6 +12,8 @@ export type FoodHit = {
   proteinPer100g: number;
   carbPer100g: number;
   fatPer100g: number;
+  /** false = ข้อมูลจากผู้ใช้ทั่วโลก (บาร์โค้ด) หน้าจอควรบอกผู้ใช้ให้รู้ */
+  verified: boolean;
 };
 
 export type FoodWithServings = typeof foods.$inferSelect & {
@@ -41,6 +43,7 @@ export async function searchFoods(query: string, userId: string, limit = 20): Pr
       proteinPer100g: foods.proteinPer100g,
       carbPer100g: foods.carbPer100g,
       fatPer100g: foods.fatPer100g,
+      verified: foods.verified,
     })
     .from(foods)
     .where(
@@ -52,6 +55,9 @@ export async function searchFoods(query: string, userId: string, limit = 20): Pr
     )
     .orderBy(
       sql`(${foods.nameTh} IS NOT NULL) DESC`,
+      // ค่าจากห้องแล็บ (USDA) ต้องมาก่อนข้อมูลที่ผู้ใช้ทั่วโลกกรอกเอง (Open Food Facts)
+      // ไม่งั้นสินค้าบาร์โค้ดที่ตัวเลขน่าสงสัยจะขึ้นปนกับข้อมูลที่เชื่อถือได้ในระดับเดียวกัน
+      sql`${foods.verified} DESC`,
       sql`extensions.similarity(coalesce(${foods.nameTh}, ${foods.name}), ${trimmed}) DESC`,
       sql`length(${foods.name}) ASC`,
     )

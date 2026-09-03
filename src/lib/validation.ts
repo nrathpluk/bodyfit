@@ -79,3 +79,27 @@ export const diaryQuickEntrySchema = z.object({
 
 export type DiaryFoodEntryInput = z.infer<typeof diaryFoodEntrySchema>;
 export type DiaryQuickEntryInput = z.infer<typeof diaryQuickEntrySchema>;
+
+/** แก้ปริมาณของรายการที่บันทึกแล้ว — server คำนวณสารอาหารใหม่เอง */
+export const diaryAmountUpdateSchema = z.object({
+  entryId: z.uuid("รหัสรายการไม่ถูกต้อง"),
+  grams: z.coerce.number().positive("ปริมาณต้องมากกว่า 0").max(5000, "ปริมาณมากเกินไป").optional(),
+  servingId: z.uuid().optional(),
+  quantity: z.coerce.number().positive().max(50).default(1),
+});
+
+/** แก้รายการที่กรอกแคลเอง */
+export const diaryQuickUpdateSchema = diaryQuickEntrySchema
+  .omit({ entryDate: true, meal: true })
+  .extend({ entryId: z.uuid("รหัสรายการไม่ถูกต้อง") });
+
+/** บันทึกซ้ำจากรายการเดิม */
+export const diaryRepeatSchema = z.object({
+  sourceEntryId: z.uuid("รหัสรายการไม่ถูกต้อง"),
+  entryDate: dateString.default(() => today()),
+  meal: mealSlot,
+});
+
+export type DiaryAmountUpdateInput = z.infer<typeof diaryAmountUpdateSchema>;
+export type DiaryQuickUpdateInput = z.infer<typeof diaryQuickUpdateSchema>;
+export type DiaryRepeatInput = z.infer<typeof diaryRepeatSchema>;
