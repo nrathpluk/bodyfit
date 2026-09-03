@@ -29,6 +29,13 @@
       "when": 1788332657406,
       "tag": "0003_food_name_th",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788332657407,
+      "tag": "0004_recipes",
+      "breakpoints": true
     }
   ]
 }

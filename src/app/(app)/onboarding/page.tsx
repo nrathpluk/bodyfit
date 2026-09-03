@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { ProfileForm } from "@/components/profile-form";
 import { requireUser } from "@/lib/auth";
@@ -31,8 +32,17 @@ export default async function OnboardingPage() {
           rateKgPerWeek: profile?.rateKgPerWeek,
         }}
       />
-      <div className="mt-10 border-t border-line pt-6 text-center">
-        <SignOutButton />
+      <div className="mt-10 space-y-6 border-t border-line pt-6">
+        <Link
+          href="/recipes"
+          className="flex min-h-[48px] cursor-pointer items-center justify-between rounded-xl border border-line px-4 text-sm transition-colors duration-200 hover:bg-sunken"
+        >
+          สูตรของฉัน
+          <span className="text-ink-3">→</span>
+        </Link>
+        <div className="text-center">
+          <SignOutButton />
+        </div>
       </div>
     </main>
   );

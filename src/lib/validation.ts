@@ -103,3 +103,31 @@ export const diaryRepeatSchema = z.object({
 export type DiaryAmountUpdateInput = z.infer<typeof diaryAmountUpdateSchema>;
 export type DiaryQuickUpdateInput = z.infer<typeof diaryQuickUpdateSchema>;
 export type DiaryRepeatInput = z.infer<typeof diaryRepeatSchema>;
+
+/** สูตรของผู้ใช้ */
+export const recipeSchema = z.object({
+  name: z.string().trim().min(1, "กรุณาใส่ชื่อสูตร").max(120, "ชื่อยาวเกินไป"),
+  servings: z.coerce
+    .number()
+    .positive("จำนวนที่ต้องมากกว่า 0")
+    .max(50, "จำนวนที่มากเกินไป")
+    .default(1),
+  note: z.string().trim().max(500).optional(),
+});
+
+export const recipeItemSchema = z.object({
+  recipeId: z.uuid("รหัสสูตรไม่ถูกต้อง"),
+  foodId: z.uuid("รหัสอาหารไม่ถูกต้อง"),
+  grams: z.coerce.number().positive("ปริมาณต้องมากกว่า 0").max(5000, "ปริมาณมากเกินไป"),
+});
+
+export const diaryRecipeEntrySchema = z.object({
+  recipeId: z.uuid("รหัสสูตรไม่ถูกต้อง"),
+  entryDate: dateString.default(() => today()),
+  meal: mealSlot,
+  servings: z.coerce.number().positive().max(20).default(1),
+});
+
+export type RecipeInput = z.infer<typeof recipeSchema>;
+export type RecipeItemInput = z.infer<typeof recipeItemSchema>;
+export type DiaryRecipeEntryInput = z.infer<typeof diaryRecipeEntrySchema>;

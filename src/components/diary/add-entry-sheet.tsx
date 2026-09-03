@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { addFoodAction, addQuickAction, repeatEntryAction } from "@/app/(app)/diary/actions";
+import { logRecipeAction } from "@/app/(app)/recipes/actions";
 import { Alert, Button, Eyebrow, Field, Input, Select } from "@/components/ui";
 import { Plus, ScanIcon } from "@/components/icons";
 import { localizeServingLabel } from "@/lib/servings";
@@ -27,6 +28,14 @@ type RecentFood = {
   servingLabel: string | null;
   grams: number | null;
   kcal: number;
+};
+
+type RecipeOption = {
+  id: string;
+  name: string;
+  servings: number;
+  ingredientCount: number;
+  kcalPerServing: number;
 };
 
 /**
@@ -65,6 +74,7 @@ function Sheet({
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<FoodHit[]>([]);
   const [recents, setRecents] = useState<RecentFood[]>([]);
+  const [myRecipes, setMyRecipes] = useState<RecipeOption[]>([]);
   const [selected, setSelected] = useState<FoodDetail | null>(null);
   const [searching, setSearching] = useState(false);
   const [quickMode, setQuickMode] = useState(false);
@@ -74,7 +84,9 @@ function Sheet({
 
   // คำค้นสั้นเกินไปให้ถือว่าไม่มีผลลัพธ์ คำนวณตอน render ไม่ต้องล้าง state ใน effect
   const results = query.trim().length < 2 ? [] : hits;
-  const showRecents = query.trim().length < 2 && recents.length > 0;
+  const idle = query.trim().length < 2;
+  const showRecents = idle && recents.length > 0;
+  const showRecipes = idle && myRecipes.length > 0;
 
   useEffect(() => {
     fetch("/api/diary/recent")
@@ -82,6 +94,13 @@ function Sheet({
       .then((data) => data && setRecents(data.foods ?? []))
       .catch(() => {
         // ไม่มีรายการล่าสุดก็ยังค้นหาได้ตามปกติ
+      });
+
+    fetch("/api/recipes")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => data && setMyRecipes(data.recipes ?? []))
+      .catch(() => {
+        // ไม่มีสูตรก็ยังค้นหาได้ตามปกติ
       });
   }, []);
 
@@ -112,6 +131,20 @@ function Sheet({
     setError(null);
     startTransition(async () => {
       const result = await action(formData);
+      if (result.ok) onClose();
+      else setError(result.message);
+    });
+  }
+
+  function logRecipe(recipe: RecipeOption) {
+    setError(null);
+    startTransition(async () => {
+      const result = await logRecipeAction({
+        recipeId: recipe.id,
+        ...(date ? { entryDate: date } : {}),
+        meal,
+        servings: 1,
+      });
       if (result.ok) onClose();
       else setError(result.message);
     });
@@ -207,6 +240,39 @@ function Sheet({
                       </span>
                       <span className="shrink-0 text-sm tabular-nums text-ink-3">
                         {Math.round(recent.kcal).toLocaleString("th-TH")} kcal
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {showRecipes && (
+            <section>
+              <div className="mb-1.5">
+                <Eyebrow>สูตรของฉัน</Eyebrow>
+                <p className="mt-0.5 text-xs text-ink-3">แตะเพื่อบันทึกหนึ่งที่</p>
+              </div>
+              <ul className="divide-y divide-line">
+                {myRecipes.map((recipe) => (
+                  <li key={recipe.id}>
+                    <button
+                      type="button"
+                      disabled={pending || recipe.ingredientCount === 0}
+                      onClick={() => logRecipe(recipe)}
+                      className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 py-3 text-left transition-colors duration-200 hover:bg-sunken disabled:opacity-40"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm">{recipe.name}</span>
+                        <span className="block truncate text-xs text-ink-3">
+                          {recipe.ingredientCount === 0
+                            ? "ยังไม่มีวัตถุดิบ"
+                            : `${recipe.ingredientCount} วัตถุดิบ · แบ่งได้ ${recipe.servings} ที่`}
+                        </span>
+                      </span>
+                      <span className="tnum shrink-0 text-sm text-ink-3">
+                        {Math.round(recipe.kcalPerServing).toLocaleString("th-TH")} kcal
                       </span>
                     </button>
                   </li>

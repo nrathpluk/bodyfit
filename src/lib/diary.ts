@@ -8,6 +8,8 @@ import { ensureDailyTarget } from "./profile";
 import type { DailyTarget } from "./nutrition";
 import type { MealSlot, Micros } from "./types";
 import { MEAL_SLOTS } from "./types";
+import { getRecipe } from "./recipes";
+import { perServing } from "./nutrition";
 import type { DiaryFoodEntryInput, DiaryQuickEntryInput } from "./validation";
 
 export type DiaryEntry = typeof diaryEntries.$inferSelect;
@@ -118,6 +120,38 @@ export async function addFoodEntry(
       grams,
       servingLabel,
       ...nutrients,
+    })
+    .returning();
+
+  return entry;
+}
+
+/**
+ * บันทึกสูตรลงไดอารี — server คำนวณจากส่วนประกอบของสูตรเอง
+ *
+ * ตัวเลขถูก snapshot ตอนบันทึกตามกฎเดิม แก้สูตรทีหลังแล้วมื้อที่บันทึกไปแล้วไม่ขยับตาม
+ * ไม่เก็บ foodId เพราะสูตรไม่ใช่อาหารหนึ่งรายการในคลัง
+ */
+export async function addRecipeEntry(
+  userId: string,
+  input: { recipeId: string; entryDate: DateString; meal: MealSlot; servings: number },
+): Promise<DiaryEntry | null> {
+  const recipe = await getRecipe(userId, input.recipeId);
+  if (!recipe || recipe.ingredients.length === 0) return null;
+
+  // perServing ของสูตรคูณด้วยจำนวนที่กิน = หารด้วย (1/servings)
+  const eaten = perServing(recipe.perServing, 1 / input.servings);
+
+  const [entry] = await db
+    .insert(diaryEntries)
+    .values({
+      userId,
+      entryDate: input.entryDate,
+      meal: input.meal,
+      name: recipe.name,
+      grams: Math.round((recipe.totalGrams / recipe.servings) * input.servings * 100) / 100,
+      servingLabel: input.servings === 1 ? "1 ที่" : `${input.servings} ที่`,
+      ...eaten,
     })
     .returning();
 

@@ -153,3 +153,43 @@ export const weightLogs = pgTable(
   },
   (t) => [uniqueIndex("weight_logs_user_date_idx").on(t.userId, t.logDate)],
 );
+
+/**
+ * สูตรของผู้ใช้ — ประกอบเมนูจากวัตถุดิบในคลังครั้งเดียว แล้วบันทึกทั้งจานในแตะเดียว
+ *
+ * นี่คือทางที่ทำให้บันทึกอาหารไทยได้โดยไม่ต้องรอฐานข้อมูลเมนูไทยจากใคร
+ * ("กะเพราหมูสับ = หมูสับ 100 ก. + ข้าวสวย 200 ก. + น้ำมัน 15 ก.")
+ *
+ * เก็บเป็นส่วนประกอบ ไม่ใช่ snapshot เพราะสูตรถูกแก้ได้เรื่อย ๆ
+ * ส่วนตอนบันทึกลงไดอารียังคำนวณแล้ว snapshot ตัวเลขตามกฎเดิม
+ */
+export const recipes = pgTable(
+  "recipes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    name: text("name").notNull(),
+    /** สูตรนี้แบ่งได้กี่ที่ — ใช้หารสารอาหารรวมให้เป็นต่อหนึ่งที่ */
+    servings: real("servings").default(1).notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("recipes_user_idx").on(t.userId)],
+);
+
+export const recipeItems = pgTable(
+  "recipe_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    recipeId: uuid("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    foodId: uuid("food_id")
+      .notNull()
+      .references(() => foods.id, { onDelete: "restrict" }),
+    grams: real("grams").notNull(),
+    sortOrder: real("sort_order").default(0).notNull(),
+  },
+  (t) => [index("recipe_items_recipe_idx").on(t.recipeId)],
+);

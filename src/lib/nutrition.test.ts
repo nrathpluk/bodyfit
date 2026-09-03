@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  perServing,
   ACTIVITY_MULTIPLIERS,
   MIN_KCAL,
   atwaterKcal,
@@ -115,5 +116,30 @@ describe("การสเกลและรวมยอด", () => {
     expect(total.micros.iron_mg).toBe(2);
     expect(total.micros.fiber_g).toBe(1.4);
     expect("vitamin_c_mg" in total.micros).toBe(false);
+  });
+});
+
+describe("การหารสูตรเป็นต่อหนึ่งที่", () => {
+  const total = {
+    kcal: 900,
+    protein: 60,
+    carb: 90,
+    fat: 30,
+    micros: { sodium_mg: 1200, fiber_g: 6 },
+  };
+
+  it("หารทั้งมาโครและไมโครตามจำนวนที่", () => {
+    const one = perServing(total, 3);
+    expect(one.kcal).toBe(300);
+    expect(one.protein).toBe(20);
+    expect(one.micros.sodium_mg).toBe(400);
+  });
+
+  it("รับจำนวนที่เป็นทศนิยมได้ (สูตรแบ่งครึ่ง)", () => {
+    expect(perServing(total, 1.5).kcal).toBe(600);
+  });
+
+  it("จำนวนที่เป็นศูนย์ต้องไม่ทำให้ค่ากลายเป็นอนันต์", () => {
+    expect(perServing(total, 0).kcal).toBe(900);
   });
 });

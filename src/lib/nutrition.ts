@@ -220,3 +220,22 @@ export function atwaterKcal(macros: { protein: number; carb: number; fat: number
     macros.fat * KCAL_PER_GRAM.fat
   );
 }
+
+/**
+ * หารสารอาหารรวมของสูตรให้เป็นต่อหนึ่งที่
+ * ป้องกันการหารด้วยศูนย์ไว้ด้วย เพราะจำนวนที่มาจากช่องกรอกของผู้ใช้
+ */
+export function perServing(total: Nutrients, servings: number): Nutrients {
+  const divisor = servings > 0 ? servings : 1;
+  const micros: Micros = {};
+  for (const [key, value] of Object.entries(total.micros)) {
+    micros[key] = round2(value / divisor);
+  }
+  return {
+    kcal: round2(total.kcal / divisor),
+    protein: round2(total.protein / divisor),
+    carb: round2(total.carb / divisor),
+    fat: round2(total.fat / divisor),
+    micros,
+  };
+}
