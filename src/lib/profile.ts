@@ -2,9 +2,13 @@ import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { dailyTargets, profiles, weightLogs } from "@/db/schema";
+import { adaptiveTdee } from "./adaptive";
 import { ageOn, today, type DateString } from "./dates";
-import { dailyTarget, type DailyTarget } from "./nutrition";
+import { getIntakeStats } from "./diary";
+import { bmr, dailyTarget, tdee, type DailyTarget } from "./nutrition";
 import type { ProfileInput } from "./validation";
+import { getWeightTrend } from "./weight-queries";
+import { latestTrend, weeklyChangeKg } from "./weight";
 
 export type Profile = typeof profiles.$inferSelect;
 
@@ -33,6 +37,48 @@ function computeTarget(profile: Profile, weightKg: number, onDate: DateString): 
     activity: profile.activityLevel,
     goal: profile.goal,
     rateKgPerWeek: profile.rateKgPerWeek,
+  });
+}
+
+/**
+ * เป้าของวัน โดยใช้ TDEE ที่ประมาณจากข้อมูลจริงถ้ามีพอ
+ *
+ * ใช้ "น้ำหนักแนวโน้ม" แทนน้ำหนักดิบของวันล่าสุดในการคำนวณด้วย
+ * เพราะวันที่บวมน้ำไม่ควรทำให้เป้าของวันนั้นเพี้ยนตาม
+ */
+async function computeAdaptiveTarget(
+  userId: string,
+  profile: Profile,
+  fallbackWeightKg: number,
+  onDate: DateString,
+): Promise<DailyTarget> {
+  const trend = await getWeightTrend(userId, 60, onDate);
+  const weightKg = latestTrend(trend) ?? fallbackWeightKg;
+  const ageYears = ageOn(profile.birthDate, onDate);
+
+  const formulaTdee = tdee(
+    bmr({ sex: profile.sex, weightKg, heightCm: profile.heightCm, ageYears }),
+    profile.activityLevel,
+  );
+
+  const intake = await getIntakeStats(userId, 28, onDate);
+  const adaptive = adaptiveTdee({
+    formulaTdee,
+    windowDays: intake.windowDays,
+    loggedDays: intake.loggedDays,
+    avgIntakeKcal: intake.avgIntakeKcal,
+    weeklyChangeKg: weeklyChangeKg(trend),
+  });
+
+  return dailyTarget({
+    sex: profile.sex,
+    weightKg,
+    heightCm: profile.heightCm,
+    ageYears,
+    activity: profile.activityLevel,
+    goal: profile.goal,
+    rateKgPerWeek: profile.rateKgPerWeek,
+    tdeeOverride: adaptive,
   });
 }
 
@@ -123,7 +169,7 @@ export async function ensureDailyTarget(
   const weight = await getLatestWeight(userId);
   if (!profile || !weight) return null;
 
-  const target = computeTarget(profile, weight.weightKg, date);
+  const target = await computeAdaptiveTarget(userId, profile, weight.weightKg, date);
   await db
     .insert(dailyTargets)
     .values({ userId, targetDate: date, ...target })

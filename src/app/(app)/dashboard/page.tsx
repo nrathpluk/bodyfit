@@ -5,7 +5,7 @@ import { MicroList } from "@/components/diary/micro-list";
 import { Card, Eyebrow } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { formatThaiDate, today } from "@/lib/dates";
-import { loadDay } from "@/lib/diary";
+import { getLoggingStreak, loadDay } from "@/lib/diary";
 import { getProfile } from "@/lib/profile";
 
 export default async function DashboardPage() {
@@ -14,7 +14,10 @@ export default async function DashboardPage() {
   if (!profile) redirect("/onboarding");
 
   const date = today();
-  const day = await loadDay(user.id, date);
+  const [day, streak] = await Promise.all([
+    loadDay(user.id, date),
+    getLoggingStreak(user.id, 7, date),
+  ]);
   // มีโปรไฟล์แต่ยังไม่เคยชั่งน้ำหนัก = ทำ onboarding ไม่จบ
   if (!day.target) redirect("/onboarding");
 
@@ -42,6 +45,34 @@ export default async function DashboardPage() {
 
         <div className="mt-4 space-y-4 xl:mt-0">
           <MicroList micros={day.totals.micros} />
+          {/*
+            รายงานเป็น "x จาก 7 วัน" ไม่ใช่ streak ที่ขาดแล้วรีเซ็ตเป็นศูนย์
+            งานวิจัยเรื่องการติดตามอาหารชี้ว่าการบันทึกต่อเนื่องแบบหยาบ ๆ
+            ได้ผลกว่าบันทึกละเอียดแล้วเลิก และ streak ที่ขาดคือจุดที่คนเลิกใช้แอป
+          */}
+          <Card className="space-y-3">
+            <div className="flex items-baseline justify-between gap-3">
+              <Eyebrow>ความสม่ำเสมอ</Eyebrow>
+              <span className="tnum text-sm text-ink-2">
+                {streak.loggedDays}
+                <span className="text-ink-3"> / {streak.windowDays} วัน</span>
+              </span>
+            </div>
+            <div className="flex gap-1.5" aria-hidden>
+              {Array.from({ length: streak.windowDays }).map((_, index) => (
+                <span
+                  key={index}
+                  className={`h-1.5 flex-1 rounded-[2px] ${
+                    index < streak.loggedDays ? "bg-ink" : "bg-sunken"
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-ink-3">
+              บันทึกได้บ้างไม่ได้บ้างก็ยังนับ — ความต่อเนื่องสำคัญกว่าความครบถ้วน
+            </p>
+          </Card>
+
           <Card>
             <p className="text-sm text-ink-3">
               พลังงานพื้นฐาน (BMR) {day.target.basis.bmr.toLocaleString("th-TH")} kcal ·

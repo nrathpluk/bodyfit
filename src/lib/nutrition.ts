@@ -74,6 +74,10 @@ export type TargetBasis = {
   /** true เมื่อเป้าที่ขอต่ำกว่าขั้นต่ำและถูกดันขึ้นมาที่ MIN_KCAL */
   floored: boolean;
   formula: "mifflin-st-jeor";
+  /** ที่มาของค่า TDEE ที่ใช้จริง — "formula" คือจากสูตรล้วน */
+  tdeeSource?: "formula" | "blended";
+  /** 0–1 ความมั่นใจในค่าที่วัดได้จากข้อมูลจริงของผู้ใช้ */
+  tdeeConfidence?: number;
 };
 
 export type DailyTarget = {
@@ -98,9 +102,14 @@ export function dailyTarget(input: {
   goal: Goal;
   /** บวก = ตั้งใจขึ้น, ลบ = ตั้งใจลง; goal maintain จะถูกบังคับเป็น 0 */
   rateKgPerWeek: number;
+  /**
+   * ใช้ค่านี้แทน TDEE จากสูตร เมื่อมีข้อมูลจริงพอจะประมาณได้แม่นกว่า
+   * (ดู lib/adaptive.ts) ส่วนที่เหลือของสูตรทำงานเหมือนเดิมทุกอย่าง
+   */
+  tdeeOverride?: { tdee: number; source: "formula" | "blended"; confidence: number };
 }): DailyTarget {
   const bmrValue = bmr(input);
-  const tdeeValue = tdee(bmrValue, input.activity);
+  const tdeeValue = input.tdeeOverride?.tdee ?? tdee(bmrValue, input.activity);
 
   const rate = input.goal === "maintain" ? 0 : input.rateKgPerWeek;
   const raw = tdeeValue + (rate * KCAL_PER_KG_FAT) / 7;
@@ -132,6 +141,8 @@ export function dailyTarget(input: {
       tdee: Math.round(tdeeValue),
       floored,
       formula: "mifflin-st-jeor",
+      tdeeSource: input.tdeeOverride?.source ?? "formula",
+      tdeeConfidence: input.tdeeOverride?.confidence ?? 0,
     },
   };
 }

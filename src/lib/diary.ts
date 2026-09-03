@@ -1,8 +1,8 @@
 import "server-only";
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import { db } from "@/db";
 import { diaryEntries, foods, foodServings } from "@/db/schema";
-import { type DateString, today } from "./dates";
+import { addDays, type DateString, today } from "./dates";
 import { scaleTo, sumNutrients, type Nutrients } from "./nutrition";
 import { ensureDailyTarget } from "./profile";
 import type { DailyTarget } from "./nutrition";
@@ -367,4 +367,67 @@ export async function updateQuickEntry(
     .returning();
 
   return updated ?? null;
+}
+
+export type IntakeStats = {
+  windowDays: number;
+  /** จำนวนวันที่มีการบันทึกอาหารอย่างน้อยหนึ่งรายการ */
+  loggedDays: number;
+  /** ค่าเฉลี่ยพลังงานต่อวัน นับเฉพาะวันที่บันทึก */
+  avgIntakeKcal: number;
+};
+
+/**
+ * สถิติการกินย้อนหลัง สำหรับใช้ประมาณ TDEE จริง (ดู lib/adaptive.ts)
+ *
+ * นับ "วันที่บันทึก" แยกจาก "ความยาวช่วง" โดยตั้งใจ เพราะถ้าเอาพลังงานทั้งหมด
+ * หารด้วยจำนวนวันทั้งช่วง วันที่ลืมบันทึกจะถูกนับเป็นกินศูนย์แคล
+ * แล้วระบบจะสรุปว่าเผาผลาญน้อยกว่าความจริงมาก และตั้งเป้าต่ำเกินไปจนอันตราย
+ *
+ * รวมยอดใน JavaScript ตามกฎของโปรเจกต์ ไม่เขียนสูตรชุดที่สองลง SQL
+ */
+export async function getIntakeStats(
+  userId: string,
+  windowDays = 28,
+  onDate: DateString = today(),
+): Promise<IntakeStats> {
+  const since = addDays(onDate, -(windowDays - 1));
+  const rows = await db
+    .select({ entryDate: diaryEntries.entryDate, kcal: diaryEntries.kcal })
+    .from(diaryEntries)
+    .where(
+      and(
+        eq(diaryEntries.userId, userId),
+        gte(diaryEntries.entryDate, since),
+        lte(diaryEntries.entryDate, onDate),
+      ),
+    );
+
+  const byDate = new Map<string, number>();
+  for (const row of rows) {
+    byDate.set(row.entryDate, (byDate.get(row.entryDate) ?? 0) + row.kcal);
+  }
+
+  const totals = [...byDate.values()];
+  const loggedDays = totals.length;
+  const avgIntakeKcal =
+    loggedDays > 0 ? Math.round(totals.reduce((a, b) => a + b, 0) / loggedDays) : 0;
+
+  return { windowDays, loggedDays, avgIntakeKcal };
+}
+
+/**
+ * ความสม่ำเสมอของการบันทึก — "5 จาก 7 วัน" ไม่ใช่ streak ที่ขาดแล้วรีเซ็ตเป็นศูนย์
+ *
+ * งานวิจัยเรื่องการติดตามอาหารชี้ว่าการบันทึกต่อเนื่องแบบหยาบ ๆ ได้ผลกว่า
+ * บันทึกละเอียดแล้วเลิกกลางทาง streak ที่ขาดคือจุดที่คนเลิกใช้แอป
+ * ตัวเลขแบบนี้จึงให้กำลังใจโดยไม่ลงโทษคนที่พลาดไปวันสองวัน
+ */
+export async function getLoggingStreak(
+  userId: string,
+  windowDays = 7,
+  onDate: DateString = today(),
+): Promise<{ loggedDays: number; windowDays: number }> {
+  const stats = await getIntakeStats(userId, windowDays, onDate);
+  return { loggedDays: stats.loggedDays, windowDays };
 }

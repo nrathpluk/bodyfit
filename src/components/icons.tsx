@@ -110,3 +110,14 @@ export function SearchIcon(props: SVGProps<SVGSVGElement>) {
     </Icon>
   );
 }
+
+export function ScaleIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M4 20h16" />
+      <path d="M12 4v16" />
+      <circle cx="12" cy="4" r="1.6" />
+      <path d="M7 8h10l3 7a5 5 0 0 1-16 0z" />
+    </Icon>
+  );
+}

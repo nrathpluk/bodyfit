@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookIcon, ChartIcon, UserIcon } from "./icons";
+import { BookIcon, ChartIcon, ScaleIcon, UserIcon } from "./icons";
 
 /**
  * เมนูหลัก — เปลี่ยนรูปตามขนาดจอ
@@ -15,6 +15,7 @@ import { BookIcon, ChartIcon, UserIcon } from "./icons";
 const TABS = [
   { href: "/dashboard", label: "สรุป", Icon: ChartIcon },
   { href: "/diary", label: "บันทึก", Icon: BookIcon },
+  { href: "/weight", label: "น้ำหนัก", Icon: ScaleIcon },
   { href: "/onboarding", label: "ตั้งค่า", Icon: UserIcon },
 ] as const;
 

@@ -9,7 +9,7 @@ import { NextResponse, type NextRequest } from "next/server";
  *
  * เพิ่มหน้าที่ต้องล็อกอิน ต้องเติมทั้ง PROTECTED และ config.matcher ข้างล่าง
  */
-const PROTECTED = ["/dashboard", "/onboarding", "/diary", "/settings"];
+const PROTECTED = ["/dashboard", "/onboarding", "/diary", "/weight", "/settings"];
 
 export default async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -53,5 +53,12 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/dashboard/:path*", "/onboarding/:path*", "/diary/:path*", "/settings/:path*"],
+  matcher: [
+    "/login",
+    "/dashboard/:path*",
+    "/onboarding/:path*",
+    "/diary/:path*",
+    "/weight/:path*",
+    "/settings/:path*",
+  ],
 };
