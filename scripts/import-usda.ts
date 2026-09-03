@@ -14,12 +14,14 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { foods, foodServings } from "../src/db/schema";
 import { THAI_NAMES } from "../src/db/thai-names";
+import { pickDefaultServingIndex } from "../src/lib/servings";
 import { mapUsdaFood, type UsdaFood } from "../src/lib/usda";
 
 type UsdaPortion = {
   gramWeight?: number;
   modifier?: string;
   amount?: number;
+  sequenceNumber?: number;
   measureUnit?: { name?: string };
 };
 
@@ -79,9 +81,11 @@ async function main() {
       verified: true,
     });
 
-    const portions = ((food as { foodPortions?: UsdaPortion[] }).foodPortions ?? []).filter(
-      (portion) => (portion.gramWeight ?? 0) > 0,
-    );
+    // เรียงตาม sequenceNumber ของ USDA ซึ่งวางหน่วยหลักของอาหารนั้นไว้ก่อน
+    // (ไข่ = "large" ไม่ใช่ "tbsp") เรียงตามน้ำหนักจะได้หน่วยจิ๊บจ๊อยขึ้นก่อนเสมอ
+    const portions = ((food as { foodPortions?: UsdaPortion[] }).foodPortions ?? [])
+      .filter((portion) => (portion.gramWeight ?? 0) > 0)
+      .sort((a, b) => (a.sequenceNumber ?? 99) - (b.sequenceNumber ?? 99));
     if (portions.length > 0) portionsByRef.set(mapped.sourceRef, portions.slice(0, 6));
   }
 
@@ -124,20 +128,36 @@ async function main() {
     const foodId = idByRef.get(ref);
     if (!foodId) continue;
     const seen = new Set<string>();
+    const usable: { label: string; grams: number }[] = [];
     for (const portion of portions) {
       const label = servingLabel(portion);
       if (!label || seen.has(label)) continue;
       seen.add(label);
-      servingRows.push({ foodId, label, grams: portion.gramWeight!, isDefault: seen.size === 1 });
+      usable.push({ label, grams: portion.gramWeight! });
     }
+    const defaultIndex = pickDefaultServingIndex(usable.map((item) => item.label));
+    usable.forEach((item, index) => {
+      servingRows.push({ foodId, ...item, isDefault: index === defaultIndex });
+    });
   }
+
+  // ล้างธงหน่วยตั้งต้นก่อนเขียนรอบใหม่
+  // ถ้าไม่ล้าง แถวที่เคยเป็นค่าตั้งต้นใน import รอบก่อนจะค้างเป็น true
+  // ทำให้อาหารรายการเดียวมีหน่วยตั้งต้นสองอัน แล้วหน้าจอหยิบอันไหนก็ได้
+  await db.execute(
+    sql`UPDATE food_servings s SET is_default = false FROM foods f
+        WHERE f.id = s.food_id AND f.source = 'usda'`,
+  );
 
   console.log(`กำลังบันทึกหน่วยครัว ${servingRows.length.toLocaleString("th-TH")} รายการ…`);
   for (let i = 0; i < servingRows.length; i += CHUNK) {
     await db
       .insert(foodServings)
       .values(servingRows.slice(i, i + CHUNK))
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: [foodServings.foodId, foodServings.label],
+        set: { grams: sql`excluded.grams`, isDefault: sql`excluded.is_default` },
+      });
     process.stdout.write(`\r  ${Math.min(i + CHUNK, servingRows.length)}/${servingRows.length}`);
   }
 

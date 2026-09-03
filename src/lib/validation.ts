@@ -46,3 +46,36 @@ export const weightInputSchema = z.object({
   weightKg: z.coerce.number().min(25, "น้ำหนักต่ำเกินไป").max(400, "น้ำหนักสูงเกินไป"),
   bodyFatPct: z.coerce.number().min(1).max(70).optional(),
 });
+
+/**
+ * บันทึกมื้ออาหาร — มีสองแบบ
+ * 1. เลือกจากคลัง (มี foodId) → server คำนวณสารอาหารเองจากฐานข้อมูล
+ *    ไม่รับตัวเลขจาก client เด็ดขาด
+ * 2. quick add (ไม่มี foodId) → ผู้ใช้กรอกแคลเอง สำหรับของที่ไม่มีในคลัง
+ */
+const mealSlot = z.enum(["breakfast", "lunch", "dinner", "snack"], {
+  message: "มื้ออาหารไม่ถูกต้อง",
+});
+
+export const diaryFoodEntrySchema = z.object({
+  entryDate: dateString.default(() => today()),
+  meal: mealSlot,
+  foodId: z.uuid("รหัสอาหารไม่ถูกต้อง"),
+  /** เลือกได้ทางใดทางหนึ่ง: กรัมตรง ๆ หรือหน่วยครัว × จำนวน */
+  grams: z.coerce.number().positive("ปริมาณต้องมากกว่า 0").max(5000, "ปริมาณมากเกินไป").optional(),
+  servingId: z.uuid().optional(),
+  quantity: z.coerce.number().positive().max(50).default(1),
+});
+
+export const diaryQuickEntrySchema = z.object({
+  entryDate: dateString.default(() => today()),
+  meal: mealSlot,
+  name: z.string().trim().min(1, "กรุณาใส่ชื่ออาหาร").max(120, "ชื่อยาวเกินไป"),
+  kcal: z.coerce.number().min(0, "พลังงานติดลบไม่ได้").max(10000, "พลังงานสูงเกินจริง"),
+  protein: z.coerce.number().min(0).max(1000).default(0),
+  carb: z.coerce.number().min(0).max(1000).default(0),
+  fat: z.coerce.number().min(0).max(1000).default(0),
+});
+
+export type DiaryFoodEntryInput = z.infer<typeof diaryFoodEntrySchema>;
+export type DiaryQuickEntryInput = z.infer<typeof diaryQuickEntrySchema>;

@@ -61,9 +61,12 @@ export default async function DashboardPage() {
         </Link>
       </Card>
 
-      <Card className="text-center text-sm text-muted">
-        การบันทึกมื้ออาหารกำลังจะมาในขั้นถัดไป
-      </Card>
+      <Link
+        href="/diary"
+        className="block min-h-[52px] rounded-2xl bg-brand px-4 py-4 text-center font-medium text-white"
+      >
+        บันทึกอาหารวันนี้
+      </Link>
     </main>
   );
 }
