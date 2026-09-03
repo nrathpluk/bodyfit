@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   if (!day.target) redirect("/onboarding");
 
   return (
-    <main className="mx-auto w-full max-w-md space-y-4 px-5 py-6">
+    <main className="mx-auto w-full max-w-md space-y-4 px-5 py-6 md:max-w-2xl xl:max-w-5xl">
       <header>
         <p className="text-sm text-muted">{formatThaiDate(date)}</p>
         <h1 className="text-2xl font-semibold tracking-tight">
@@ -28,27 +28,32 @@ export default async function DashboardPage() {
       </header>
 
       {/* หน้านี้ตอบคำถามเดียว: วันนี้เหลือกินได้อีกเท่าไร ไม่ใช่แค่แสดงเป้าที่ตั้งไว้ */}
-      <DaySummary totals={day.totals} target={day.target} />
+      <div className="gap-4 xl:grid xl:grid-cols-2 xl:items-start xl:space-y-0">
+        <div className="space-y-4">
+          <DaySummary totals={day.totals} target={day.target} />
 
-      <Link
-        href="/diary"
-        className="block min-h-[52px] cursor-pointer rounded-2xl bg-brand px-4 py-4 text-center font-medium text-white transition-colors duration-200 hover:bg-brand-strong"
-      >
-        บันทึกอาหารวันนี้
-      </Link>
+          <Link
+            href="/diary"
+            className="block min-h-[52px] cursor-pointer rounded-2xl bg-brand px-4 py-4 text-center font-medium text-white transition-colors duration-200 hover:bg-brand-strong"
+          >
+            บันทึกอาหารวันนี้
+          </Link>
+        </div>
 
-      <MicroList micros={day.totals.micros} />
-
-      <Card>
-        <p className="text-sm text-muted">
-          พลังงานพื้นฐาน (BMR) {day.target.basis.bmr.toLocaleString("th-TH")} kcal ·
-          ใช้จริงต่อวัน (TDEE) {day.target.basis.tdee.toLocaleString("th-TH")} kcal
-        </p>
-        <p className="mt-2 text-xs text-muted">
-          คิดจากน้ำหนัก {day.target.basis.weightKg} กก. อายุ {day.target.basis.ageYears} ปี
-          ด้วยสูตร Mifflin-St Jeor
-        </p>
-      </Card>
+        <div className="mt-4 space-y-4 xl:mt-0">
+          <MicroList micros={day.totals.micros} />
+          <Card>
+            <p className="text-sm text-muted">
+              พลังงานพื้นฐาน (BMR) {day.target.basis.bmr.toLocaleString("th-TH")} kcal ·
+              ใช้จริงต่อวัน (TDEE) {day.target.basis.tdee.toLocaleString("th-TH")} kcal
+            </p>
+            <p className="mt-2 text-xs text-muted">
+              คิดจากน้ำหนัก {day.target.basis.weightKg} กก. อายุ {day.target.basis.ageYears} ปี
+              ด้วยสูตร Mifflin-St Jeor
+            </p>
+          </Card>
+        </div>
+      </div>
     </main>
   );
 }
