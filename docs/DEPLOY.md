@@ -13,31 +13,48 @@
 ตัวเก่าต่อไปเรื่อย ๆ แม้ deploy ใหม่ไปแล้ว แก้บั๊กในนั้นไม่ถึงเครื่องผู้ใช้
 `vercel.json` จึงบังคับ `must-revalidate` ไว้
 
-## ขั้นตอน
+## สถานะปัจจุบัน
 
-1. เข้า https://vercel.com/new แล้วเลือก repo `nrathpluk/bodyfit`
-2. Framework จะถูกตรวจเป็น Next.js เอง ไม่ต้องแก้ Build Command หรือ Output Directory
-3. ใส่ Environment Variables ทั้งสามตัว (เลือกทั้ง Production, Preview, Development)
+deploy แล้วที่ **https://bodymefit.vercel.app** (โปรเจกต์ `bodymefit` ภายใต้บัญชี `jay-7344`)
 
-   | ชื่อ | ค่า |
-   |---|---|
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://qskjjobaflbpmqadmdqh.supabase.co` |
-   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_EauSCdILGWapYz0QnCfo0A_6fLc6I2u` |
-   | `DATABASE_URL` | connection string ของ transaction pooler (port **6543**) จาก `.env.local` |
+Environment variables ที่ตั้งไว้บน Vercel แล้ว ทั้ง Production และ Preview
 
-   `DIRECT_URL` **ไม่ต้องใส่** — ใช้เฉพาะตอนรัน migration จากเครื่องตัวเอง
-   ตัวแอปบน Vercel ไม่ได้รัน migration
+| ชื่อ | หมายเหตุ |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL ของโปรเจกต์ Supabase |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | คีย์สาธารณะ ปลอดภัยที่จะอยู่ในบันเดิลฝั่ง client |
+| `DATABASE_URL` | transaction pooler port **6543** |
 
-4. กด Deploy
+`DIRECT_URL` **ไม่ได้ใส่บน Vercel โดยตั้งใจ** — ใช้เฉพาะตอนรัน migration จากเครื่องตัวเอง
+ตัวแอปไม่ได้รัน migration จึงไม่ควรเอารหัสผ่านขึ้นไปเก็บในที่ที่ไม่ได้ใช้
+
+## deploy ด้วยมือ
+
+```bash
+vercel deploy --prod --yes
+```
+
+## ยังค้าง: ต่อ GitHub เพื่อให้ deploy อัตโนมัติ
+
+`vercel git connect` ยังล้มเหลวเพราะ **Vercel GitHub App ยังไม่ได้ติดตั้งบนบัญชี GitHub**
+Vercel จึงมองไม่เห็น repo แก้โดยเข้า
+
+https://vercel.com/jay-7344/bodymefit/settings/git
+
+แล้วกด Connect Git Repository → เลือก `nrathpluk/bodyfit` → GitHub จะขอให้ติดตั้งแอปให้ก่อน
+เสร็จแล้วทุก push ขึ้น `main` จะ deploy เอง และ branch อื่นจะได้ URL พรีวิวของตัวเอง
 
 ## หลัง deploy เสร็จ
 
-- เอา URL ที่ได้ไปใส่ใน Supabase Dashboard → Authentication → URL Configuration → **Site URL**
+- ใส่ `https://bodymefit.vercel.app` ใน Supabase Dashboard → Authentication → URL Configuration → **Site URL**
   ถ้าวันหลังเปิด "ยืนยันอีเมล" กลับมา ลิงก์ในอีเมลจะได้ชี้มาที่โดเมนจริงไม่ใช่ localhost
 - เปิดเว็บบนมือถือแล้วกด "เพิ่มไปยังหน้าจอโฮม" เพื่อทดสอบ PWA
   (service worker ทำงานเฉพาะบน HTTPS กับ localhost เท่านั้น)
 
-## deploy ครั้งถัดไป
+## ข้อควรระวังเรื่อง connection string
 
-Vercel ผูกกับ GitHub ไว้แล้ว ทุกครั้งที่ push ขึ้น `main` จะ deploy ให้เอง
-ส่วน branch อื่นจะได้ URL พรีวิวแยกของตัวเอง
+รหัสผ่านฐานข้อมูลมีอักขระ `@` อยู่ข้างใน ซึ่งตามมาตรฐาน URL ต้องเข้ารหัสเป็น `%40`
+ตอนนี้ใช้งานได้เพราะ `postgres.js` ตัดที่ `@` ตัวสุดท้าย แต่เครื่องมืออื่น
+(psql, Prisma, ตัวตรวจ URL ทั่วไป) อาจตีความผิดว่าโฮสต์คือส่วนหลัง `@` ตัวแรก
+ถ้าวันหลังเจอ error แปลก ๆ เรื่องต่อฐานข้อมูล ให้ลองเข้ารหัส `@` เป็น `%40`
+และ `+` เป็น `%2B` ก่อนเป็นอันดับแรก
