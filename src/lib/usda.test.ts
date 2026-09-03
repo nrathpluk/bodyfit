@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { atwaterKcal } from "./nutrition";
-import { convertUnit, mapUsdaFood, type UsdaFood } from "./usda";
+import { convertUnit } from "./units";
+import { mapUsdaFood, type UsdaFood } from "./usda";
 
 /** ตัดมาจากรูปแบบจริงของ endpoint /food/{fdcId} */
 const rawEgg: UsdaFood = {

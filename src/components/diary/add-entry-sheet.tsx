@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { addFoodAction, addQuickAction } from "@/app/diary/actions";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
+import { BarcodeScanner, type ScannedFood } from "./barcode-scanner";
 import type { MealSlot } from "@/lib/types";
 import { MEAL_LABELS } from "@/lib/types";
 import { localizeServingLabel } from "@/lib/servings";
@@ -54,6 +55,7 @@ function Sheet({
   const [selected, setSelected] = useState<FoodDetail | null>(null);
   const [searching, setSearching] = useState(false);
   const [quickMode, setQuickMode] = useState(false);
+  const [scanMode, setScanMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -113,6 +115,14 @@ function Sheet({
             onBack={() => setSelected(null)}
             onSubmit={(formData) => submit(formData, addFoodAction)}
           />
+        ) : scanMode ? (
+          <BarcodeScanner
+            onCancel={() => setScanMode(false)}
+            onFound={(food: ScannedFood) => {
+              setScanMode(false);
+              setSelected(food);
+            }}
+          />
         ) : quickMode ? (
           <QuickForm
             meal={meal}
@@ -123,13 +133,24 @@ function Sheet({
           />
         ) : (
           <div className="space-y-4">
-            <Input
-              autoFocus
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="ค้นหาอาหาร เช่น ข้าวสวย, egg"
-              enterKeyHint="search"
-            />
+            <div className="flex gap-2">
+              <Input
+                autoFocus
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="ค้นหาอาหาร เช่น ข้าวสวย, egg"
+                enterKeyHint="search"
+                className="flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setScanMode(true)}
+                aria-label="สแกนบาร์โค้ด"
+                className="min-h-[48px] shrink-0 rounded-xl border border-line px-4 text-sm"
+              >
+                สแกน
+              </button>
+            </div>
 
             {searching && <p className="text-sm text-muted">กำลังค้นหา…</p>}
 

@@ -1,5 +1,6 @@
-import { USDA_NUMBER_TO_MICRO, type MicroKey } from "./micros";
+import { USDA_NUMBER_TO_MICRO } from "./micros";
 import type { Micros } from "./types";
+import { convertUnit, unitOf } from "./units";
 
 /**
  * แปลงข้อมูลดิบจาก USDA FoodData Central → รูปแบบของเรา
@@ -52,28 +53,6 @@ function readNutrient(item: UsdaNutrient): { number?: string; unit?: string; amo
     unit: (item.nutrient?.unitName ?? item.unitName)?.toLowerCase(),
     amount: item.amount ?? item.value,
   };
-}
-
-/**
- * แปลงหน่วยของ USDA ให้ตรงกับหน่วยที่คีย์ของเราประกาศไว้
- *
- * คืน null เมื่อแปลงไม่ได้ (เช่น วิตามินดีที่มาเป็น IU ซึ่งตัวคูณต่างกัน
- * ตามชนิด D2/D3) — ปล่อยให้คีย์นั้นหายไปดีกว่าใส่ค่าที่ผิดหน่วย
- * เพราะค่าที่ผิดหน่วยจะกลายเป็นตัวเลขที่ผู้ใช้เชื่อแล้วเข้าใจผิด
- */
-export function convertUnit(amount: number, from: string, to: "g" | "mg" | "mcg"): number | null {
-  const scale: Record<string, number> = { g: 1, mg: 1e-3, "µg": 1e-6, ug: 1e-6, mcg: 1e-6 };
-  const fromScale = scale[from];
-  if (fromScale === undefined) return null;
-  const toScale = scale[to];
-  const grams = amount * fromScale;
-  return grams / toScale;
-}
-
-/** หน่วยที่คีย์ไมโครแต่ละตัวประกาศไว้ ("sodium_mg" → "mg") */
-function unitOf(key: MicroKey): "g" | "mg" | "mcg" {
-  const suffix = key.slice(key.lastIndexOf("_") + 1);
-  return suffix as "g" | "mg" | "mcg";
 }
 
 /**
