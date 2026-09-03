@@ -1,9 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import { PwaRegister } from "@/components/pwa-register";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Bodymefit — นับแคลอรีและสารอาหาร",
   description: "บันทึกอาหารที่กิน ดูแคลอรี มาโคร และวิตามินเทียบกับเป้าหมายของคุณ",
+  applicationName: "Bodymefit",
+  // iOS ไม่อ่าน manifest สำหรับสามอย่างนี้ ต้องบอกผ่าน meta tag ของ Apple เอง
+  appleWebApp: {
+    capable: true,
+    title: "Bodymefit",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: "/icon-192.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -19,7 +31,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="th" className="h-full antialiased">
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        <PwaRegister />
+      </body>
     </html>
   );
 }

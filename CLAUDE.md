@@ -119,6 +119,19 @@ npm run db:migrate          # รัน migration (ต้องมี DATABASE_U
   แล้วอ่านผิดว่า "ไม่มีสารอาหารตัวนี้"
 - `BarcodeDetector` ยังไม่มีใน Safari บน iOS **ช่องกรอกเลขเองต้องมีเสมอ** ไม่ใช่ทางเลือกสำรอง
 
+## PWA
+
+`manifest.ts` เป็น metadata route ของ Next (ออกมาเป็น `/manifest.webmanifest`)
+ไอคอนสร้างจากโค้ดด้วย `npm run icons` (`scripts/generate-icons.mjs` เขียน PNG เองด้วย zlib
+ไม่ต้องลง sharp) ไฟล์ผลลัพธ์ commit ไว้ใน `public/` เพื่อให้ build ไม่ต้องรันสคริปต์
+
+- **service worker ห้ามแคชหน้าที่ต้องล็อกอินหรือคำตอบของ API** เครื่องเดียวอาจมีคนใช้หลายคน
+  ถ้าแคชไว้ คนถัดไปที่เปิดแอปจะเห็นข้อมูลของคนก่อนหน้าโดยเซิร์ฟเวอร์ไม่รู้เรื่องด้วย
+  แคชได้เฉพาะ `/offline`, ไอคอน และบันเดิลใน `/_next/static/` (ชื่อมีแฮชอยู่แล้ว)
+- **หน้า `/offline` ต้องไม่แตะฐานข้อมูลและไม่ต้องล็อกอิน** ไม่งั้นตอนออฟไลน์จะเรนเดอร์ไม่ได้
+- `PwaRegister` ข้ามการลงทะเบียนตอน dev เพราะ service worker จะแคชบันเดิลเก่าค้างจน HMR ไม่ทำงาน
+- ทดสอบ PWA ต้องใช้ production build (`npm run build` แล้ว preview ชื่อ `bodymefit-prod` ที่พอร์ต 3001)
+
 ## กฎที่แก้แล้วพัง
 
 - **`diary_entries` เก็บตัวเลขสารอาหารเป็น snapshot ตอนบันทึก** ห้าม join สดจาก `foods` ตอนแสดงผล
