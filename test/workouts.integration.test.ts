@@ -6,14 +6,16 @@ vi.mock("@/db", () => ({ db: testDb }));
 
 const {
   addWorkoutSet,
-  deleteExercise,
+  deleteExerciseHistory,
   deleteWorkoutSet,
   findOrCreateExercise,
   getDaySets,
   getExerciseSummaries,
-  getRecentExerciseNames,
-  listExercises,
+  getRecentExercises,
+  listCustomExercises,
+  searchExercises,
 } = await import("@/lib/workouts");
+const { exercises } = await import("@/db/schema");
 
 const TODAY = "2026-10-20";
 let userId: string;
@@ -27,19 +29,19 @@ describe("ท่าออกกำลังกาย", () => {
     const first = await findOrCreateExercise(userId, "เบนช์เพรส");
     const again = await findOrCreateExercise(userId, "เบนช์เพรส");
     expect(again.id).toBe(first.id);
-    expect(await listExercises(userId)).toHaveLength(1);
+    expect(await listCustomExercises(userId)).toHaveLength(1);
   });
 
   it("ตัดช่องว่างหัวท้ายก่อนเทียบชื่อ", async () => {
     const spaced = await findOrCreateExercise(userId, "  เบนช์เพรส  ");
-    expect(await listExercises(userId)).toHaveLength(1);
+    expect(await listCustomExercises(userId)).toHaveLength(1);
     expect(spaced.name).toBe("เบนช์เพรส");
   });
 
   it("ผู้ใช้คนละคนมีท่าชื่อเดียวกันได้", async () => {
     const other = await createTestUser(testDb, "lift2@bodymefit.app");
     await findOrCreateExercise(other, "เบนช์เพรส");
-    expect(await listExercises(other)).toHaveLength(1);
+    expect(await listCustomExercises(other)).toHaveLength(1);
   });
 });
 
@@ -77,9 +79,9 @@ describe("การบันทึกเซ็ต", () => {
   });
 
   it("ท่าที่เพิ่งเล่นเรียงของใหม่ก่อนและไม่ซ้ำ", async () => {
-    const names = await getRecentExerciseNames(userId);
-    expect(new Set(names).size).toBe(names.length);
-    expect(names).toContain("เบนช์เพรส");
+    const recent = await getRecentExercises(userId);
+    expect(new Set(recent.map((r) => r.id)).size).toBe(recent.length);
+    expect(recent.map((r) => r.name)).toContain("เบนช์เพรส");
   });
 });
 
@@ -146,19 +148,110 @@ describe("สรุปความก้าวหน้า", () => {
     expect(summary.sessions).toHaveLength(2);
   });
 
-  it("ลบท่าแล้วเซ็ตทั้งหมดของท่านั้นหายตาม", async () => {
+  it("ลบประวัติแล้วเซ็ตทั้งหมดของท่านั้นหายตาม", async () => {
     const owner = await seedProgress("cascade-lift@bodymefit.app", [["2026-10-01", 80, 5]]);
     const [summary] = await getExerciseSummaries(owner, 180, TODAY);
 
-    expect(await deleteExercise(owner, summary.id)).toBe(true);
+    expect(await deleteExerciseHistory(owner, summary.id)).toBe(true);
     expect(await getExerciseSummaries(owner, 180, TODAY)).toHaveLength(0);
     expect(await getDaySets(owner, "2026-10-01")).toHaveLength(0);
   });
 
-  it("ลบท่าของคนอื่นไม่ได้", async () => {
+  it("ลบประวัติของคนอื่นไม่ได้", async () => {
     const owner = await seedProgress("owner-lift@bodymefit.app", [["2026-10-01", 80, 5]]);
     const intruder = await createTestUser(testDb, "lift-thief2@bodymefit.app");
     const [summary] = await getExerciseSummaries(owner, 180, TODAY);
-    expect(await deleteExercise(intruder, summary.id)).toBe(false);
+    expect(await deleteExerciseHistory(intruder, summary.id)).toBe(false);
+  });
+});
+
+describe("คลังท่ากลาง", () => {
+  it("ค้นเจอท่าจากคลังกลางที่ตัวเองไม่ได้สร้าง", async () => {
+    await testDb.insert(exercises).values({
+      userId: null,
+      name: "Barbell Bench Press - Medium Grip",
+      equipment: "barbell",
+      primaryMuscle: "chest",
+      category: "strength",
+      source: "free-exercise-db",
+      sourceRef: "Barbell_Bench_Press",
+    });
+
+    const stranger = await createTestUser(testDb, "catalog@bodymefit.app");
+    const hits = await searchExercises("bench", stranger);
+    expect(hits.map((h) => h.name)).toContain("Barbell Bench Press - Medium Grip");
+    expect(hits[0].isCustom).toBe(false);
+  });
+
+  it("ท่าที่ตัวเองสร้างขึ้นก่อนท่าคลังกลางในผลค้นหา", async () => {
+    const owner = await createTestUser(testDb, "own-first@bodymefit.app");
+    await findOrCreateExercise(owner, "Bench Press My Way");
+
+    const hits = await searchExercises("bench", owner);
+    expect(hits[0].isCustom).toBe(true);
+  });
+
+  it("ท่าส่วนตัวของคนอื่นต้องไม่โผล่ในผลค้นหา", async () => {
+    const owner = await createTestUser(testDb, "private-ex@bodymefit.app");
+    await findOrCreateExercise(owner, "Secret Bench Variation");
+
+    const stranger = await createTestUser(testDb, "stranger-ex@bodymefit.app");
+    const hits = await searchExercises("Secret Bench", stranger);
+    expect(hits).toHaveLength(0);
+  });
+
+  it("พิมพ์ชื่อที่ตรงกับคลังกลาง ต้องใช้ท่าเดิม ไม่สร้างซ้ำ", async () => {
+    const owner = await createTestUser(testDb, "reuse@bodymefit.app");
+    const used = await findOrCreateExercise(owner, "Barbell Bench Press - Medium Grip");
+    expect(used.userId).toBeNull();
+    expect(await listCustomExercises(owner)).toHaveLength(0);
+  });
+
+  it("บันทึกเซ็ตด้วย exerciseId จากคลังกลางได้", async () => {
+    const owner = await createTestUser(testDb, "byid@bodymefit.app");
+    const [shared] = await searchExercises("Barbell Bench", owner);
+
+    const set = await addWorkoutSet(owner, {
+      exerciseId: shared.id,
+      logDate: TODAY,
+      weightKg: 80,
+      reps: 5,
+    });
+    expect(set).not.toBeNull();
+
+    const [summary] = await getExerciseSummaries(owner, 180, TODAY);
+    expect(summary.name).toBe("Barbell Bench Press - Medium Grip");
+  });
+
+  it("ใช้ท่าส่วนตัวของคนอื่นด้วย id ตรง ๆ ไม่ได้", async () => {
+    const owner = await createTestUser(testDb, "victim-ex@bodymefit.app");
+    const mine = await findOrCreateExercise(owner, "Private Curl");
+
+    const intruder = await createTestUser(testDb, "thief-ex@bodymefit.app");
+    expect(
+      await addWorkoutSet(intruder, {
+        exerciseId: mine.id,
+        logDate: TODAY,
+        weightKg: 20,
+        reps: 10,
+      }),
+    ).toBeNull();
+  });
+
+  it("ลบประวัติของท่าคลังกลาง ต้องไม่ลบท่าออกจากคลัง เพราะคนอื่นใช้อยู่", async () => {
+    const owner = await createTestUser(testDb, "keepshared@bodymefit.app");
+    const [shared] = await searchExercises("Barbell Bench", owner);
+    await addWorkoutSet(owner, {
+      exerciseId: shared.id,
+      logDate: TODAY,
+      weightKg: 60,
+      reps: 5,
+    });
+
+    expect(await deleteExerciseHistory(owner, shared.id)).toBe(true);
+
+    const stranger = await createTestUser(testDb, "other-user-ex@bodymefit.app");
+    const stillThere = await searchExercises("Barbell Bench", stranger);
+    expect(stillThere.length).toBeGreaterThan(0);
   });
 });

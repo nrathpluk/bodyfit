@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { deleteExerciseAction } from "@/app/(app)/workouts/actions";
+import { deleteExerciseHistoryAction } from "@/app/(app)/workouts/actions";
 import { Trash, TrendDown, TrendFlat, TrendUp } from "@/components/icons";
 import { Alert, Card, Eyebrow } from "@/components/ui";
 import { ProgressChart } from "./progress-chart";
@@ -11,6 +11,7 @@ import { formatThaiDate } from "@/lib/dates";
 export type ExerciseView = {
   id: string;
   name: string;
+  detail: string;
   sessions: SessionPoint[];
   progress: Progress | null;
   lastDate: string | null;
@@ -49,6 +50,9 @@ export function ExerciseCard({ exercise }: { exercise: ExerciseView }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="truncate font-medium">{exercise.name}</h2>
+          {exercise.detail && (
+            <p className="mt-0.5 truncate text-xs text-ink-3">{exercise.detail}</p>
+          )}
           <p className="mt-0.5 text-xs text-ink-3">
             {exercise.lastDate
               ? `เล่นล่าสุด ${formatThaiDate(exercise.lastDate)} · ${exercise.sessions.length} ครั้ง`
@@ -57,11 +61,11 @@ export function ExerciseCard({ exercise }: { exercise: ExerciseView }) {
         </div>
         <button
           type="button"
-          aria-label={`ลบท่า ${exercise.name}`}
+          aria-label={`ลบประวัติของ ${exercise.name}`}
           disabled={pending}
           onClick={() =>
             startTransition(async () => {
-              const result = await deleteExerciseAction(exercise.id);
+              const result = await deleteExerciseHistoryAction(exercise.id);
               if (!result.ok) setError(result.message);
             })
           }

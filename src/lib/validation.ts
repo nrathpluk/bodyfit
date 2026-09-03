@@ -136,18 +136,23 @@ export type DiaryRecipeEntryInput = z.infer<typeof diaryRecipeEntrySchema>;
  * บันทึกเซ็ตที่ยก — ไม่มีช่องแคลอรีโดยตั้งใจ
  * พลังงานที่เผาถูกคิดรวมในตัวคูณกิจกรรมของ TDEE อยู่แล้ว เอามาบวกอีกจะนับซ้ำ
  */
-export const workoutSetSchema = z.object({
-  exerciseName: z.string().trim().min(1, "กรุณาใส่ชื่อท่า").max(80, "ชื่อท่ายาวเกินไป"),
-  logDate: dateString.default(() => today()),
-  weightKg: z.coerce
-    .number()
-    .min(0, "น้ำหนักติดลบไม่ได้")
-    .max(1000, "น้ำหนักมากเกินจริง"),
-  reps: z.coerce
-    .number()
-    .int("จำนวนครั้งต้องเป็นจำนวนเต็ม")
-    .min(1, "อย่างน้อยหนึ่งครั้ง")
-    .max(100, "จำนวนครั้งมากเกินจริง"),
-});
+export const workoutSetSchema = z
+  .object({
+    /** เลือกจากคลัง 876 ท่า — ทางหลัก */
+    exerciseId: z.uuid().optional(),
+    /** พิมพ์ชื่อเองเมื่อคลังไม่มีท่านั้น — ทางสำรอง */
+    exerciseName: z.string().trim().max(80, "ชื่อท่ายาวเกินไป").optional(),
+    logDate: dateString.default(() => today()),
+    weightKg: z.coerce.number().min(0, "น้ำหนักติดลบไม่ได้").max(1000, "น้ำหนักมากเกินจริง"),
+    reps: z.coerce
+      .number()
+      .int("จำนวนครั้งต้องเป็นจำนวนเต็ม")
+      .min(1, "อย่างน้อยหนึ่งครั้ง")
+      .max(100, "จำนวนครั้งมากเกินจริง"),
+  })
+  .refine((value) => Boolean(value.exerciseId ?? value.exerciseName), {
+    message: "กรุณาเลือกหรือพิมพ์ชื่อท่า",
+    path: ["exerciseName"],
+  });
 
 export type WorkoutSetInput = z.infer<typeof workoutSetSchema>;

@@ -4,19 +4,18 @@ import { SetForm } from "@/components/workouts/set-form";
 import { Card, Eyebrow } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { formatThaiDate, today } from "@/lib/dates";
-import { getDaySets, getExerciseSummaries, getRecentExerciseNames } from "@/lib/workouts";
+import { describeExercise } from "@/lib/exercise-catalog";
+import { getDaySets, getExerciseSummaries, getRecentExercises } from "@/lib/workouts";
 
 export default async function WorkoutsPage() {
   const user = await requireUser();
   const date = today();
 
-  const [daySets, summaries, recentNames] = await Promise.all([
+  const [daySets, summaries, recent] = await Promise.all([
     getDaySets(user.id, date),
     getExerciseSummaries(user.id, 180, date),
-    getRecentExerciseNames(user.id),
+    getRecentExercises(user.id),
   ]);
-
-  const withSessions = summaries.filter((exercise) => exercise.sessions.length > 0);
 
   return (
     <main className="mx-auto w-full max-w-md space-y-4 px-5 py-6 md:max-w-2xl">
@@ -32,7 +31,7 @@ export default async function WorkoutsPage() {
       <Card>
         <Eyebrow>บันทึกเซ็ต</Eyebrow>
         <div className="mt-4">
-          <SetForm recentNames={recentNames} />
+          <SetForm recent={recent} />
         </div>
       </Card>
 
@@ -41,17 +40,18 @@ export default async function WorkoutsPage() {
         <DaySets groups={daySets} />
       </Card>
 
-      {withSessions.length === 0 ? (
+      {summaries.length === 0 ? (
         <Card className="text-center text-sm text-ink-3">
           บันทึกสักสองสามครั้งแล้วกราฟความก้าวหน้าจะขึ้นที่นี่
         </Card>
       ) : (
-        withSessions.map((exercise) => (
+        summaries.map((exercise) => (
           <ExerciseCard
             key={exercise.id}
             exercise={{
               id: exercise.id,
               name: exercise.name,
+              detail: describeExercise(exercise),
               sessions: exercise.sessions,
               progress: exercise.progress,
               lastDate: exercise.lastDate,

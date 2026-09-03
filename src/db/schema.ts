@@ -207,11 +207,28 @@ export const exercises = pgTable(
   "exercises",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id").notNull(),
+    /**
+     * null = ท่าจากคลังกลางที่ทุกคนเห็น (นำเข้าจาก free-exercise-db)
+     * ไม่ null = ท่าที่ผู้ใช้คนนั้นสร้างเอง เห็นคนเดียว
+     * แนวเดียวกับ foods.created_by
+     */
+    userId: uuid("user_id"),
     name: text("name").notNull(),
+    /** อุปกรณ์ที่ใช้ เช่น barbell, dumbbell, body only */
+    equipment: text("equipment"),
+    /** หมวด เช่น strength, stretching, cardio */
+    category: text("category"),
+    /** กล้ามเนื้อหลักที่ใช้ เช่น chest, quadriceps */
+    primaryMuscle: text("primary_muscle"),
+    level: text("level"),
+    source: text("source").default("custom").notNull(),
+    sourceRef: text("source_ref"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [uniqueIndex("exercises_user_name_idx").on(t.userId, t.name)],
+  (t) => [
+    index("exercises_name_idx").on(t.name),
+    index("exercises_user_idx").on(t.userId),
+  ],
 );
 
 /** หนึ่งเซ็ตที่ยกจริง — น้ำหนัก × จำนวนครั้ง */

@@ -14,7 +14,8 @@
     "db:studio": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs studio",
     "db:check": "node --env-file=.env.local scripts/db-check.mjs",
     "import:usda": "node --env-file=.env.local node_modules/.bin/tsx scripts/import-usda.ts",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "import:exercises": "node --env-file=.env.local node_modules/.bin/tsx scripts/import-exercises.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { workoutSetSchema } from "@/lib/validation";
-import { addWorkoutSet, deleteExercise, deleteWorkoutSet } from "@/lib/workouts";
+import { addWorkoutSet, deleteExerciseHistory, deleteWorkoutSet } from "@/lib/workouts";
 
 export type ActionResult = { ok: true } | { ok: false; message: string };
 
@@ -20,7 +20,9 @@ export async function addSetAction(formData: FormData): Promise<ActionResult> {
   const parsed = workoutSetSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, message: firstError(parsed.error) };
 
-  await addWorkoutSet(user.id, parsed.data);
+  const added = await addWorkoutSet(user.id, parsed.data);
+  if (!added) return { ok: false, message: "ไม่พบท่านี้ ลองเลือกจากรายการอีกครั้ง" };
+
   revalidatePath("/workouts");
   return { ok: true };
 }
@@ -34,10 +36,11 @@ export async function deleteSetAction(setId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-export async function deleteExerciseAction(exerciseId: string): Promise<ActionResult> {
+/** ลบประวัติของท่านั้นทั้งหมด (ไม่ลบท่าออกจากคลังกลาง เพราะคนอื่นใช้อยู่) */
+export async function deleteExerciseHistoryAction(exerciseId: string): Promise<ActionResult> {
   const user = await requireUser();
-  const removed = await deleteExercise(user.id, exerciseId);
-  if (!removed) return { ok: false, message: "ไม่พบท่านี้" };
+  const removed = await deleteExerciseHistory(user.id, exerciseId);
+  if (!removed) return { ok: false, message: "ไม่พบประวัติของท่านี้" };
 
   revalidatePath("/workouts");
   return { ok: true };
