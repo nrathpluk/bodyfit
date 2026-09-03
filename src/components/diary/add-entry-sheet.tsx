@@ -35,7 +35,7 @@ type RecentFood = {
  * คนส่วนใหญ่กินวนอยู่ไม่กี่อย่าง การบังคับให้พิมพ์ค้นใหม่ทุกมื้อคือความฝืดที่ใหญ่ที่สุด
  * ของแอปนับแคล รายการล่าสุดจึงบันทึกซ้ำได้ในแตะเดียว
  */
-export function AddEntrySheet({ meal, date }: { meal: MealSlot; date: string }) {
+export function AddEntrySheet({ meal, date }: { meal: MealSlot; date: string | null }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -59,7 +59,7 @@ function Sheet({
   onClose,
 }: {
   meal: MealSlot;
-  date: string;
+  date: string | null;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -122,7 +122,8 @@ function Sheet({
     startTransition(async () => {
       const result = await repeatEntryAction({
         sourceEntryId: recent.sourceEntryId,
-        entryDate: date,
+        // ไม่ส่งวันเมื่อเป็นวันนี้ ให้ server เติมเอง กันบันทึกผิดวันตอนข้ามเที่ยงคืน
+        ...(date ? { entryDate: date } : {}),
         meal,
       });
       if (result.ok) onClose();
@@ -278,7 +279,7 @@ function QuantityForm({
 }: {
   food: FoodDetail;
   meal: MealSlot;
-  date: string;
+  date: string | null;
   pending: boolean;
   onBack: () => void;
   onSubmit: (formData: FormData) => void;
@@ -287,7 +288,7 @@ function QuantityForm({
 
   return (
     <form action={onSubmit} className="space-y-5">
-      <input type="hidden" name="entryDate" value={date} />
+      {date && <input type="hidden" name="entryDate" value={date} />}
       <input type="hidden" name="meal" value={meal} />
       <input type="hidden" name="foodId" value={food.id} />
 
@@ -369,14 +370,14 @@ function QuickForm({
   onSubmit,
 }: {
   meal: MealSlot;
-  date: string;
+  date: string | null;
   pending: boolean;
   onBack: () => void;
   onSubmit: (formData: FormData) => void;
 }) {
   return (
     <form action={onSubmit} className="space-y-5">
-      <input type="hidden" name="entryDate" value={date} />
+      {date && <input type="hidden" name="entryDate" value={date} />}
       <input type="hidden" name="meal" value={meal} />
 
       <button type="button" onClick={onBack} className="cursor-pointer text-sm text-ink-3">

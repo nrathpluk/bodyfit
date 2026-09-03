@@ -238,6 +238,21 @@ describe("server action ของไดอารี", () => {
     expect(after.entriesByMeal.dinner[0].grams).toBe(source.grams);
   });
 
+  it("ไม่ส่งวันมา = ให้ server ตัดสินว่าวันนี้ กันบันทึกผิดวันตอนข้ามเที่ยงคืน", async () => {
+    const solo = await createTestUser(testDb, "midnight@bodymefit.app");
+    currentUserId = solo;
+
+    // ฟอร์มของ "วันนี้" จะไม่ส่ง entryDate มาเลย
+    const result = await actions.addFoodAction(
+      form({ meal: "snack", foodId: riceId, grams: "100", quantity: "1" }),
+    );
+    expect(result.ok).toBe(true);
+
+    const { today } = await import("@/lib/dates");
+    const day = await loadDay(solo, today());
+    expect(day.entriesByMeal.snack).toHaveLength(1);
+  });
+
   it("แก้รายการของคนอื่นไม่ได้", async () => {
     const day = await loadDay(userId, DATE);
     const victim = day.entriesByMeal.lunch[0];

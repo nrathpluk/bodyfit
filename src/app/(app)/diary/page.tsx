@@ -19,6 +19,17 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
   const raw = Array.isArray(params.date) ? params.date[0] : params.date;
   const date = raw && DATE_PATTERN.test(raw) ? raw : today();
 
+  /*
+   * เมื่อกำลังดูวันนี้ ให้ส่ง null ลงไปแทนวันที่
+   *
+   * ฟอร์มจะไม่ใส่ entryDate ไปด้วย แล้ว schema จะเติม "วันนี้" ให้ตอน server รับคำสั่ง
+   * ถ้าฝังวันที่ไว้ตอนเรนเดอร์ คนที่เปิดหน้าค้างไว้ตอน 23:50 แล้วบันทึกของว่างตอน 00:10
+   * จะถูกบันทึกลงเมื่อวาน — ซึ่งคนกินดึกคือกลุ่มที่บันทึกตอนดึกพอดี
+   * ส่วนตอนดูวันย้อนหลัง ต้องส่งวันนั้นไปตรง ๆ เพราะเป็นเจตนาของผู้ใช้
+   */
+  const isToday = date === today();
+  const formDate = isToday ? null : date;
+
   const day = await loadDay(user.id, date);
   const isEmpty = MEAL_SLOTS.every((meal) => day.entriesByMeal[meal].length === 0);
 
@@ -66,7 +77,7 @@ export default async function DiaryPage({ searchParams }: PageProps<"/diary">) {
             <MealSection
               key={meal}
               meal={meal}
-              date={date}
+              date={formDate}
               entries={day.entriesByMeal[meal]}
               totals={day.mealTotals[meal]}
             />

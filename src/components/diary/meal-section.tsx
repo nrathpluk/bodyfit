@@ -12,7 +12,8 @@ export function MealSection({
   totals,
 }: {
   meal: MealSlot;
-  date: string;
+  /** null = วันนี้ ให้ server เป็นคนตัดสินวันตอนรับคำสั่ง (ดู diary/page.tsx) */
+  date: string | null;
   entries: DiaryEntry[];
   totals: Nutrients;
 }) {

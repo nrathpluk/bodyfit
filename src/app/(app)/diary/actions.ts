@@ -78,7 +78,8 @@ export async function copyYesterdayAction(date: string): Promise<ActionResult> {
  */
 export async function repeatEntryAction(input: {
   sourceEntryId: string;
-  entryDate: string;
+  /** ไม่ส่งมา = วันนี้ ให้ schema เติมให้ตอน server รับคำสั่ง */
+  entryDate?: string;
   meal: string;
 }): Promise<ActionResult> {
   const user = await requireUser();
